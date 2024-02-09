@@ -9,6 +9,9 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
   },
+  "dependencies": {
+    "apexcharts": "3.45.2"
+  },
   "devDependencies": {
     "@sveltejs/adapter-auto": "3.1.1",
     "@sveltejs/kit": "2.5.0",

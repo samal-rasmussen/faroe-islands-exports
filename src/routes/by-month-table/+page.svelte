@@ -1,67 +1,20 @@
 <script>
-  import { get_by_month_data } from "$lib";
-  import groups from "$lib/country-groups.json";
+  import { filter_months_data } from "$lib";
 
-  const data = get_by_month_data();
-  const header = /** @type {string[]} */ (data.shift());
-
-  const individual_countries_list = [
-    "Danmark",
-    "Sambandsríki Amerika (USA)",
-    "Kina",
-    "Russland",
-  ];
-  const individual_countries_map = new Map(
-    individual_countries_list.map((country) => [country, true])
-  );
-  const nordics_map = new Map(Object.entries(groups.nordics));
-  const europe_map = new Map(Object.entries(groups.europe));
-  const asia_map = new Map(Object.entries(groups["asia-middle-east-oceania"]));
-  const africa_map = new Map(Object.entries(groups.africa));
-  const americas_map = new Map(Object.entries(groups.americas));
-
-  const individual_countries = data.filter((row) =>
-    individual_countries_map.has(row[0])
-  );
-  const nordics = data.filter(
-    (row) => nordics_map.has(row[0]) && !individual_countries_map.has(row[0])
-  );
-  const europe = data.filter(
-    (row) => europe_map.has(row[0]) && !individual_countries_map.has(row[0])
-  );
-  const asia = data.filter(
-    (row) => asia_map.has(row[0]) && !individual_countries_map.has(row[0])
-  );
-  const africa = data.filter(
-    (row) => africa_map.has(row[0]) && !individual_countries_map.has(row[0])
-  );
-  const americas = data.filter(
-    (row) => americas_map.has(row[0]) && !individual_countries_map.has(row[0])
-  );
-
-  const nordics_summed = sum_group(nordics);
-  const europe_summed = sum_group(europe);
-  const asia_summed = sum_group(asia);
-  const africa_summed = sum_group(africa);
-  const americas_summed = sum_group(americas);
-
-  /**
-   * @param {string[][]} group
-   */
-  function sum_group(group) {
-    const reduced = group.reduce((acc, row) => {
-      for (let i = 1; i < row.length; i++) {
-        acc[i] += row[i];
-      }
-      return acc;
-    }, new Array(header.length).fill(0));
-
-    reduced.forEach((value, i) => {
-      reduced[i] = Math.round(value * 100) / 100;
-    });
-    reduced[0] = "Sum";
-    return reduced;
-  }
+  const {
+    header,
+    individual_countries,
+    nordics,
+    nordics_summed,
+    europe,
+    europe_summed,
+    asia,
+    asia_summed,
+    africa,
+    africa_summed,
+    americas,
+    americas_summed,
+  } = filter_months_data();
 </script>
 
 <table>
