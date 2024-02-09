@@ -1,17 +1,28 @@
 <script>
-  import csv from "../../../by-month.csv?raw";
+  import { by_month_data } from "$lib";
+  import groups from "$lib/country-groups.json";
 
-  console.log();
-  const data = csv.split("\n").map((row) => row.split(";"));
-  // parse cells to numbers
+  const data = by_month_data;
   const header = /** @type {string[]} */ (data.shift());
-  data.forEach((row, i) => {
-    row.forEach((cell, j) => {
-      if (i > 0 && j > 0) {
-        row[j] = /** @type {any} */ (+cell);
-      }
-    });
-  });
+
+  const europe_map = new Map(Object.entries(groups.europe));
+  const asia_map = new Map(Object.entries(groups["asia-middle-east-oceania"]));
+  const africa_map = new Map(Object.entries(groups.africa));
+  const americas_map = new Map(Object.entries(groups.americas));
+
+  const europe = data.filter((row) => europe_map.has(row[0]));
+  const asia = data.filter((row) => asia_map.has(row[0]));
+  const africa = data.filter((row) => africa_map.has(row[0]));
+  const americas = data.filter((row) => americas_map.has(row[0]));
+
+  console.log(
+    europe.length,
+    asia.length,
+    africa.length,
+    americas.length,
+    europe.length + asia.length + africa.length + americas.length,
+    data.length
+  );
 </script>
 
 <table>
@@ -23,7 +34,40 @@
     </tr>
   </thead>
   <tbody>
-    {#each data.slice(1) as row}
+    <tr>
+      <td colspan={header.length}>Evropa</td>
+    </tr>
+    {#each europe as row}
+      <tr>
+        {#each row as column}
+          <td class="number">{column}</td>
+        {/each}
+      </tr>
+    {/each}
+    <tr>
+      <td colspan={header.length}>Asia, Miðeystur, Oceania</td>
+    </tr>
+    {#each asia as row}
+      <tr>
+        {#each row as column}
+          <td class="number">{column}</td>
+        {/each}
+      </tr>
+    {/each}
+    <tr>
+      <td colspan={header.length}>Afrika</td>
+    </tr>
+    {#each africa as row}
+      <tr>
+        {#each row as column}
+          <td class="number">{column}</td>
+        {/each}
+      </tr>
+    {/each}
+    <tr>
+      <td colspan={header.length}>Amerika</td>
+    </tr>
+    {#each americas as row}
       <tr>
         {#each row as column}
           <td class="number">{column}</td>
