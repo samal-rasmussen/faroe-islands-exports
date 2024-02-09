@@ -5,17 +5,39 @@
   const data = get_by_month_data();
   const header = /** @type {string[]} */ (data.shift());
 
+  const individual_countries_list = [
+    "Danmark",
+    "Sambandsríki Amerika (USA)",
+    "Kina",
+    "Russland",
+  ];
+  const individual_countries_map = new Map(
+    individual_countries_list.map((country) => [country, true])
+  );
   const nordics_map = new Map(Object.entries(groups.nordics));
   const europe_map = new Map(Object.entries(groups.europe));
   const asia_map = new Map(Object.entries(groups["asia-middle-east-oceania"]));
   const africa_map = new Map(Object.entries(groups.africa));
   const americas_map = new Map(Object.entries(groups.americas));
 
-  const nordics = data.filter((row) => nordics_map.has(row[0]));
-  const europe = data.filter((row) => europe_map.has(row[0]));
-  const asia = data.filter((row) => asia_map.has(row[0]));
-  const africa = data.filter((row) => africa_map.has(row[0]));
-  const americas = data.filter((row) => americas_map.has(row[0]));
+  const individual_countries = data.filter((row) =>
+    individual_countries_map.has(row[0])
+  );
+  const nordics = data.filter(
+    (row) => nordics_map.has(row[0]) && !individual_countries_map.has(row[0])
+  );
+  const europe = data.filter(
+    (row) => europe_map.has(row[0]) && !individual_countries_map.has(row[0])
+  );
+  const asia = data.filter(
+    (row) => asia_map.has(row[0]) && !individual_countries_map.has(row[0])
+  );
+  const africa = data.filter(
+    (row) => africa_map.has(row[0]) && !individual_countries_map.has(row[0])
+  );
+  const americas = data.filter(
+    (row) => americas_map.has(row[0]) && !individual_countries_map.has(row[0])
+  );
 
   const nordics_summed = sum_group(nordics);
   const europe_summed = sum_group(europe);
@@ -51,6 +73,13 @@
     </tr>
   </thead>
   <tbody>
+    {#each individual_countries as row}
+      <tr>
+        {#each row as column}
+          <td class="number">{column}</td>
+        {/each}
+      </tr>
+    {/each}
     <tr>
       <td colspan={header.length}>Norðurlond</td>
     </tr>
