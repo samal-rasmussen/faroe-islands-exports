@@ -17,19 +17,29 @@
   const africa = data.filter((row) => africa_map.has(row[0]));
   const americas = data.filter((row) => americas_map.has(row[0]));
 
-  console.log(
-    nordics.length,
-    europe.length,
-    asia.length,
-    africa.length,
-    americas.length,
-    nordics.length +
-      europe.length +
-      asia.length +
-      africa.length +
-      americas.length,
-    data.length
-  );
+  const nordics_summed = sum_group(nordics);
+  const europe_summed = sum_group(europe);
+  const asia_summed = sum_group(asia);
+  const africa_summed = sum_group(africa);
+  const americas_summed = sum_group(americas);
+
+  /**
+   * @param {string[][]} group
+   */
+  function sum_group(group) {
+    const reduced = group.reduce((acc, row) => {
+      for (let i = 1; i < row.length; i++) {
+        acc[i] += row[i];
+      }
+      return acc;
+    }, new Array(header.length).fill(0));
+
+    reduced.forEach((value, i) => {
+      reduced[i] = Math.round(value * 100) / 100;
+    });
+    reduced[0] = "Sum";
+    return reduced;
+  }
 </script>
 
 <table>
@@ -44,6 +54,11 @@
     <tr>
       <td colspan={header.length}>Norðurlond</td>
     </tr>
+    <tr>
+      {#each nordics_summed as column}
+        <td class="number">{column}</td>
+      {/each}
+    </tr>
     {#each nordics as row}
       <tr>
         {#each row as column}
@@ -53,6 +68,11 @@
     {/each}
     <tr>
       <td colspan={header.length}>Evropa</td>
+    </tr>
+    <tr>
+      {#each europe_summed as column}
+        <td class="number">{column}</td>
+      {/each}
     </tr>
     {#each europe as row}
       <tr>
@@ -64,6 +84,11 @@
     <tr>
       <td colspan={header.length}>Asia, Miðeystur, Oceania</td>
     </tr>
+    <tr>
+      {#each asia_summed as column}
+        <td class="number">{column}</td>
+      {/each}
+    </tr>
     {#each asia as row}
       <tr>
         {#each row as column}
@@ -74,6 +99,11 @@
     <tr>
       <td colspan={header.length}>Afrika</td>
     </tr>
+    <tr>
+      {#each africa_summed as column}
+        <td class="number">{column}</td>
+      {/each}
+    </tr>
     {#each africa as row}
       <tr>
         {#each row as column}
@@ -83,6 +113,11 @@
     {/each}
     <tr>
       <td colspan={header.length}>Amerika</td>
+    </tr>
+    <tr>
+      {#each americas_summed as column}
+        <td class="number">{column}</td>
+      {/each}
     </tr>
     {#each americas as row}
       <tr>
