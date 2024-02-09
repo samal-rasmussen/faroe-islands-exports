@@ -1,13 +1,13 @@
 import { writeFileSync } from "fs";
 
 const by_month =
-  "https://statbank.hagstova.fo:443/sq/c38ab4f7-158f-414b-9830-0f30dbed144e";
+  "https://statbank.hagstova.fo:443/sq/316e46d3-dd15-4cf7-bce2-c417253dc8ed";
 
 const by_quarter =
-  "https://statbank.hagstova.fo:443/sq/782dd3d8-80b9-428d-a0cd-05d3bb8dd4c5";
+  "https://statbank.hagstova.fo:443/sq/0f4568f2-b415-44c3-a920-de7d38fb3a2e";
 
 const by_year =
-  "https://statbank.hagstova.fo:443/sq/fdc9aa17-27f1-4ba9-9327-46dd6db7ed45";
+  "https://statbank.hagstova.fo:443/sq/a195dbd5-b9c6-405a-922e-d592d8f21eb0";
 
 /**
  * @param {string} data
