@@ -52,6 +52,6 @@ const fetch_csv = async (url, filename) => {
   writeFileSync(filename, stringified);
 };
 
-fetch_csv(by_month, "by_month.csv");
-fetch_csv(by_quarter, "by_quarter.csv");
-fetch_csv(by_year, "by_year.csv");
+fetch_csv(by_month, "by-month.csv");
+fetch_csv(by_quarter, "by-quarter.csv");
+fetch_csv(by_year, "by-year.csv");
