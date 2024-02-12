@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { filter_months_data } from "$lib";
+  import { filter_data } from "$lib";
   import { get } from "svelte/store";
 
   /**
@@ -12,6 +12,8 @@
    * @type {HTMLDivElement}
    */
   let brush_chart_div;
+
+  const { months_data, quarters_data } = filter_data();
 
   const {
     dates,
@@ -28,7 +30,7 @@
     africa_summed,
     americas,
     americas_summed,
-  } = filter_months_data();
+  } = quarters_data;
 
   /**
    * @param {string[]} row
