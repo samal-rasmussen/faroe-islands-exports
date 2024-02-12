@@ -71,6 +71,7 @@ export function filter_months_data(
   const asia_summed = sum_group(asia, "Asia");
   const africa_summed = sum_group(africa, "Afrika");
   const americas_summed = sum_group(americas, "Amerika");
+  const all_summed = sum_group(by_month_data, "Tilsamans");
 
   const split_header = header.slice(1).map((month) => month.split(" "));
   const dates = split_header.map((v) => {
@@ -83,6 +84,7 @@ export function filter_months_data(
   return {
     dates,
     header: structuredClone(header),
+    all_summed,
     individual_countries,
     nordics,
     europe,

@@ -6,11 +6,17 @@
   /**
    * @type {HTMLDivElement}
    */
-  let chartDiv;
+  let main_chart_div;
+
+  /**
+   * @type {HTMLDivElement}
+   */
+  let brush_chart_div;
 
   const {
     dates,
     header,
+    all_summed,
     individual_countries,
     nordics,
     nordics_summed,
@@ -34,8 +40,9 @@
     };
   }
 
-  const options = {
+  const main_chart_options = {
     chart: {
+      id: "main_chart",
       height: 580,
       width: "100%",
       type: "line",
@@ -43,6 +50,10 @@
         initialAnimation: {
           enabled: false,
         },
+      },
+      toolbar: {
+        autoSelected: "pan",
+        show: false,
       },
     },
     stroke: {
@@ -62,16 +73,61 @@
     },
   };
 
+  const max_date = dates[dates.length - 1];
+  const five_years_back = new Date();
+  five_years_back.setFullYear(max_date.getFullYear() - 5);
+
+  const brush_chart_options = {
+    series: [get_series(all_summed)],
+    chart: {
+      id: "brush_chart",
+      height: 130,
+      type: "area",
+      brush: {
+        target: "main_chart",
+        enabled: true,
+      },
+      selection: {
+        enabled: true,
+        xaxis: {
+          min: five_years_back.getTime(),
+          max: max_date.getTime(),
+        },
+      },
+    },
+    colors: ["#008FFB"],
+    fill: {
+      type: "gradient",
+      gradient: {
+        opacityFrom: 0.91,
+        opacityTo: 0.1,
+      },
+    },
+    xaxis: {
+      type: "datetime",
+      tooltip: {
+        enabled: false,
+      },
+    },
+    yaxis: {
+      tickAmount: 2,
+    },
+  };
+
   onMount(async () => {
     const ApexCharts = (await import("apexcharts")).default;
-    const chart = new ApexCharts(chartDiv, options);
-    chart.render();
+    /** @type {any} */ (window).ApexCharts = ApexCharts;
+    const main_chart = new ApexCharts(main_chart_div, main_chart_options);
+    main_chart.render();
+    const brush_chart = new ApexCharts(brush_chart_div, brush_chart_options);
+    brush_chart.render();
   });
 </script>
 
 <a href="/by-month-table">Tabel við øllum data</a>
 
-<div bind:this={chartDiv}></div>
+<div bind:this={main_chart_div}></div>
+<div bind:this={brush_chart_div}></div>
 
 <style>
 </style>
