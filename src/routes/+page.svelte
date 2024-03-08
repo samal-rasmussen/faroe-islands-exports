@@ -1,7 +1,6 @@
 <script>
   import { onMount } from "svelte";
   import { filter_data } from "$lib";
-  import { get } from "svelte/store";
 
   /**
    * @type {HTMLDivElement}
