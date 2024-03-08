@@ -1,5 +1,9 @@
-<script>
-  import { filter_months_data } from "$lib";
+<script lang="ts">
+  import { page } from "$app/stores";
+  import { filter_data } from "$lib";
+
+  /** @type {"months" | "quarters"}*/
+  const range = $page.params.range;
 
   const {
     header,
@@ -14,7 +18,7 @@
     africa_summed,
     americas,
     americas_summed,
-  } = filter_months_data();
+  } = filter_data()[range === "months" ? "months_data" : "quarters_data"];
 </script>
 
 <table>

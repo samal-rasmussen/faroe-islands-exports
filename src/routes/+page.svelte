@@ -125,7 +125,10 @@
   });
 </script>
 
-<a href="/by-month-table">Tabel við øllum data</a>
+<span
+  >Tabellir við øllum data per: <a href="/by-month-table/months">Mánaða</a>,
+  <a href="/by-month-table/quarters">ársfjóring</a></span
+>
 
 <div bind:this={main_chart_div}></div>
 <div bind:this={brush_chart_div}></div>
