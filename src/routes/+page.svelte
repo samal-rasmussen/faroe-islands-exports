@@ -75,8 +75,8 @@
 	};
 
 	const max_date = dates[dates.length - 1];
-	const five_years_back = new Date();
-	five_years_back.setFullYear(max_date.getFullYear() - 5);
+	const six_years_back = new Date();
+	six_years_back.setFullYear(max_date.getFullYear() - 6);
 
 	const brush_chart_options = {
 		series: [get_series(all_summed)],
@@ -91,7 +91,7 @@
 			selection: {
 				enabled: true,
 				xaxis: {
-					min: five_years_back.getTime(),
+					min: six_years_back.getTime(),
 					max: max_date.getTime(),
 				},
 			},
@@ -125,14 +125,10 @@
 	});
 </script>
 
-<span>
-	Tabellir við øllum data per:
-	<a href="/by-month-table/months">Mánaða</a>,
-	<a href="/by-month-table/quarters">ársfjóring</a>
-</span>
-
 <div bind:this={main_chart_div}></div>
 <div bind:this={brush_chart_div}></div>
+
+<a href="/by-month-table/months">Tabel við øllum data</a>
 
 <style>
 </style>
