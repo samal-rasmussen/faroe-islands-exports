@@ -106,7 +106,13 @@
 <div bind:this={main_chart_div}></div>
 <div bind:this={brush_chart_div}></div>
 
-<a href="/by-month-table/months">Tabel við øllum data</a>
+<span>
+	Tabellir við øllum data per:
+	<a href="/by-month-table/months">Mánaða</a>,
+	<a href="/by-month-table/quarters">ársfjóring</a>,
+	<a href="/by-month-table/half-year">Hálvár</a>,
+	<a href="/by-month-table/years">Ár</a>
+</span>
 
 <style>
 </style>
