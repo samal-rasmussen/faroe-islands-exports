@@ -33,47 +33,34 @@ const by_month_dates = by_monts_split_header.map((v) => {
 });
 const by_quarter_dates = by_month_dates.filter((date) => date.getMonth() % 3 === 0);
 const by_half_year_dates = by_month_dates.filter((date) => date.getMonth() % 6 === 0);
+const by_year_dates = by_month_dates.filter((date) => date.getMonth() === 0);
 
 /**
  * @param {{data: number[], name: string}} series
+ * @param {number} period
  * @returns {{data: number[], name: string}}
  */
-function aggregate_quarter_data(series) {
-	// Aggregate data by quarter
-	const quarter_data = [];
+function aggregate_period_data(series, period) {
+	if (period < 1) {
+		throw new Error("Period cannot be less than 1");
+	}
+	if (period > 12) {
+		throw new Error("Period cannot be greater than 12");
+	}
+	// Aggregate data by period
+	const data = [];
 	const first_month = by_month_dates[0].getMonth();
-	const offset = first_month % 3;
-	// Skip partial quarter at start if needed
-	const start = offset === 0 ? 0 : 3 - offset;
-	for (let i = start; i < series.data.length; i += 3) {
+	const offset = first_month % period;
+	// Skip partial period at start if needed
+	const start = offset === 0 ? 0 : period - offset;
+	for (let i = start; i < series.data.length; i += period) {
 		const remaining = series.data.length - i;
-		const slice_end = i + Math.min(3, remaining);
+		const slice_end = i + Math.min(period, remaining);
 		const sum = series.data.slice(i, slice_end).reduce((a, b) => a + b, 0);
 		const rounded = Math.round(sum * 100) / 100;
-		quarter_data.push(rounded);
+		data.push(rounded);
 	}
-	return { name: series.name, data: quarter_data };
-}
-
-/**
- * @param {{data: number[], name: string}} series
- * @returns {{data: number[], name: string}}
- */
-function aggregate_half_year_data(series) {
-	// Aggregate data by half year
-	const half_year_data = [];
-	const first_month = by_month_dates[0].getMonth();
-	const offset = first_month % 6;
-	// Skip partial half year at start if needed
-	const start = offset === 0 ? 0 : 6 - offset;
-	for (let i = start; i < series.data.length; i += 6) {
-		const remaining = series.data.length - i;
-		const slice_end = i + Math.min(6, remaining);
-		const sum = series.data.slice(i, slice_end).reduce((a, b) => a + b, 0);
-		const rounded = Math.round(sum * 100) / 100;
-		half_year_data.push(rounded);
-	}
-	return { name: series.name, data: half_year_data };
+	return { name: series.name, data };
 }
 
 /**
@@ -84,32 +71,36 @@ export function filter_data(
 ) {
 	const maps = get_maps(individual_countries_list);
 
-	const filtered_months_data = filter_data_internal(
-		by_month_data.series,
-		by_month_data.header,
-		maps,
-	);
-	const filtered_quarters_data = {
-		series: filtered_months_data.series.map(aggregate_quarter_data),
-		all_series: aggregate_quarter_data(filtered_months_data.all_series),
+	const months_data = filter_data_internal(by_month_data.series, by_month_data.header, maps);
+	const quarters_data = {
+		series: months_data.series.map((series) => aggregate_period_data(series, 3)),
+		all_series: aggregate_period_data(months_data.all_series, 3),
 	};
-	const filtered_half_year_data = {
-		series: filtered_months_data.series.map(aggregate_half_year_data),
-		all_series: aggregate_half_year_data(filtered_months_data.all_series),
+	const half_year_data = {
+		series: months_data.series.map((series) => aggregate_period_data(series, 6)),
+		all_series: aggregate_period_data(months_data.all_series, 6),
+	};
+	const years_data = {
+		series: months_data.series.map((series) => aggregate_period_data(series, 12)),
+		all_series: aggregate_period_data(months_data.all_series, 12),
 	};
 
 	return {
 		months_data: {
-			...filtered_months_data,
+			...months_data,
 			dates: by_month_dates,
 		},
 		quarters_data: {
-			...filtered_quarters_data,
+			...quarters_data,
 			dates: by_quarter_dates,
 		},
 		half_year_data: {
-			...filtered_half_year_data,
+			...half_year_data,
 			dates: by_half_year_dates,
+		},
+		years_data: {
+			...years_data,
+			dates: by_year_dates,
 		},
 	};
 }

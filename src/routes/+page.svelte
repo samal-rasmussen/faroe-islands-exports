@@ -12,9 +12,9 @@
 	 */
 	let brush_chart_div;
 
-	const { months_data, quarters_data, half_year_data } = filter_data();
+	const { months_data, quarters_data, half_year_data, years_data } = filter_data();
 
-	const { dates, series, all_series } = half_year_data;
+	const { dates, series, all_series } = years_data;
 
 	/**
 	 * @param {{data: number[], name: string}} series
