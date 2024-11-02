@@ -16,6 +16,18 @@
 						: "years_data"
 		];
 	const { header, series, individual_series, all_series } = filtered_data;
+	let rows = [all_series, ...series, ...individual_series];
+	rows = rows.filter((x, index) => {
+		// remove duplicates
+		return rows.findIndex((y) => y.name === x.name) === index;
+	});
+	rows.sort((a, b) => {
+		if (a === undefined || b === undefined) return 0;
+		const a_last = a.data.at(-1);
+		const b_last = b.data.at(-1);
+		if (a_last === undefined || b_last === undefined) return 0;
+		return b_last - a_last;
+	});
 </script>
 
 <table>
@@ -28,25 +40,11 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td>{all_series.name}</td>
-			{#each all_series.data as column}
-				<td class="number">{column}</td>
-			{/each}
-		</tr>
-		{#each series as row}
+		{#each rows as row}
 			<tr>
 				<td>{row.name}</td>
 				{#each row.data as column}
-					<td class="number">{column}</td>
-				{/each}
-			</tr>
-		{/each}
-		{#each individual_series as row}
-			<tr>
-				<td>{row.name}</td>
-				{#each row.data as column}
-					<td class="number">{column}</td>
+					<td class="number">{Math.floor(column).toLocaleString()}</td>
 				{/each}
 			</tr>
 		{/each}
@@ -65,5 +63,6 @@
 	}
 	.number {
 		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 </style>

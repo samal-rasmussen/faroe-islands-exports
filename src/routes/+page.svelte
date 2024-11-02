@@ -29,7 +29,7 @@
 	const main_chart_options = {
 		chart: {
 			id: "main_chart",
-			height: 580,
+			height: 660,
 			width: "100%",
 			type: "line",
 			animations: {

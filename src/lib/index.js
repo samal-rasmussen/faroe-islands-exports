@@ -86,6 +86,10 @@ export function filter_data(
 		"Bretland",
 		"Týskland",
 		"Frakland",
+		"Spania",
+		"Niðurlond",
+		"Ísland",
+		"Pólland",
 	],
 ) {
 	const maps = get_maps(individual_countries_list);
