@@ -12,32 +12,17 @@
 	 */
 	let brush_chart_div;
 
-	const { months_data } = filter_data();
+	const { months_data, quarters_data, half_year_data } = filter_data();
 
-	const {
-		dates,
-		header,
-		all_summed,
-		individual_countries,
-		nordics,
-		nordics_summed,
-		europe,
-		europe_summed,
-		asia,
-		asia_summed,
-		africa,
-		africa_summed,
-		americas,
-		americas_summed,
-	} = months_data;
+	const { dates, series, all_series } = half_year_data;
 
 	/**
-	 * @param {string[]} row
+	 * @param {{data: number[], name: string}} series
 	 */
-	function get_series(row) {
+	function get_series(series) {
 		return {
-			name: row[0],
-			data: row.slice(1).map((x, i) => [dates[i], x]),
+			name: series.name,
+			data: series.data.map((x, i) => [dates[i], x]),
 		};
 	}
 
@@ -61,14 +46,7 @@
 			width: 3,
 			curve: "monotoneCubic",
 		},
-		series: [
-			...individual_countries.map((country) => get_series(country)),
-			get_series(nordics_summed),
-			get_series(europe_summed),
-			get_series(asia_summed),
-			get_series(africa_summed),
-			get_series(americas_summed),
-		],
+		series: [...series.map((s) => get_series(s))],
 		xaxis: {
 			type: "datetime",
 		},
@@ -79,7 +57,7 @@
 	six_years_back.setFullYear(max_date.getFullYear() - 6);
 
 	const brush_chart_options = {
-		series: [get_series(all_summed)],
+		series: [get_series(all_series)],
 		chart: {
 			id: "brush_chart",
 			height: 130,

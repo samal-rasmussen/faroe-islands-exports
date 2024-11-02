@@ -52,7 +52,7 @@ const fetch_csv = async (url, filename) => {
 		acc[country] = country;
 		return acc;
 	}, {});
-	writeFileSync("countries2.json", JSON.stringify(countries_map, null, 2));
+	writeFileSync("countries2.json", JSON.stringify(countries_map, null, 4));
 };
 
 fetch_csv(by_month, "by-month.csv");
