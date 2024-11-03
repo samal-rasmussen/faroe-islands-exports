@@ -14,7 +14,18 @@
 
 	const { months_data, quarters_data, half_year_data, years_data } = filter_data();
 
-	const { dates, series, all_series } = years_data;
+	let selected_range = "years";
+	/** @type {Date[]} */
+	let dates = [];
+	/** @type {{data: number[], name: string}[]} */
+	let series = [];
+	/** @type {{data: number[], name: string}} */
+	let all_series = { data: [], name: "" };
+	update_selected_range();
+
+	const max_date = dates[dates.length - 1];
+	const six_years_back = new Date();
+	six_years_back.setFullYear(max_date.getFullYear() - 6);
 
 	/**
 	 * @param {{data: number[], name: string}} series
@@ -29,7 +40,7 @@
 	const main_chart_options = {
 		chart: {
 			id: "main_chart",
-			height: 660,
+			height: 640,
 			width: "100%",
 			type: "line",
 			animations: {
@@ -51,10 +62,6 @@
 			type: "datetime",
 		},
 	};
-
-	const max_date = dates[dates.length - 1];
-	const six_years_back = new Date();
-	six_years_back.setFullYear(max_date.getFullYear() - 6);
 
 	const brush_chart_options = {
 		series: [get_series(all_series)],
@@ -93,18 +100,57 @@
 		},
 	};
 
+	/** @type {import("apexcharts")} */
+	let main_chart;
+	/** @type {import("apexcharts")} */
+	let brush_chart;
+
 	onMount(async () => {
 		const ApexCharts = (await import("apexcharts")).default;
 		/** @type {any} */ (window).ApexCharts = ApexCharts;
-		const main_chart = new ApexCharts(main_chart_div, main_chart_options);
+		main_chart = new ApexCharts(main_chart_div, main_chart_options);
+		brush_chart = new ApexCharts(brush_chart_div, brush_chart_options);
 		main_chart.render();
-		const brush_chart = new ApexCharts(brush_chart_div, brush_chart_options);
 		brush_chart.render();
 	});
+
+	function update_selected_range() {
+		if (selected_range === "months") {
+			({ dates, series, all_series } = months_data);
+		} else if (selected_range === "quarters") {
+			({ dates, series, all_series } = quarters_data);
+		} else if (selected_range === "half-year") {
+			({ dates, series, all_series } = half_year_data);
+		} else if (selected_range === "years") {
+			({ dates, series, all_series } = years_data);
+		}
+	}
+
+	function update_chart() {
+		main_chart_options.series = [...series.map((s) => get_series(s))];
+		brush_chart_options.series = [get_series(all_series)];
+		main_chart.updateOptions(main_chart_options);
+		brush_chart.updateOptions(brush_chart_options);
+		main_chart.render();
+		brush_chart.render();
+	}
 </script>
 
 <div bind:this={main_chart_div}></div>
 <div bind:this={brush_chart_div}></div>
+
+<select
+	bind:value={selected_range}
+	on:change={() => {
+		update_selected_range();
+		update_chart();
+	}}
+>
+	<option value="months">Mánaða</option>
+	<option value="quarters">ársfjóring</option>
+	<option value="half-year">Hálvár</option>
+	<option value="years">Ár</option>
+</select>
 
 <span>
 	Tabellir við øllum data per:
