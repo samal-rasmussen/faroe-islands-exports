@@ -1,8 +1,5 @@
 import { writeFileSync } from "fs";
 
-// https://statbank.hagstova.fo/pxweb/fo/H2/H2__UH__UH01/uh_sitc_t.px/
-const by_month = "https://statbank.hagstova.fo/sq/b2289d76-b001-424d-bae6-0ff473aa0097";
-
 /**
  * @param {string} data
  * @returns {(number | string)[][]}
@@ -37,22 +34,53 @@ const parse_csv = (data) => {
 	return replaced;
 };
 
+/**
+ * @param {(number|string)[][]} data
+ * @returns {(number|string)[][]}
+ */
+const pivot_data = (data) => {
+	const headers = data[0];
+	const rows = data.slice(1);
+
+	// Initialize pivoted array with months as first column
+	const pivoted = [["Month", ...rows.map((row) => row[0])]];
+
+	// For each column (excluding the first which contains country names)
+	for (let col = 1; col < headers.length; col++) {
+		const month = headers[col];
+		const values = rows.map((row) => row[col]);
+		pivoted.push([month, ...values]);
+	}
+
+	return pivoted;
+};
+
 // fetch csv data from the API and write to files
 const fetch_csv = async (url, filename) => {
 	const response = await fetch(url);
 	const data = await response.text();
 	const parsed = parse_csv(data);
+
+	// Write original format
 	const stringified = parsed.map((row) => row.join(";")).join("\n");
 	writeFileSync(filename, stringified);
 
-	// write first column to a file
+	// Write pivoted format
+	const pivoted = pivot_data(parsed);
+	const pivoted_stringified = pivoted.map((row) => row.join(";")).join("\n");
+	writeFileSync(filename.replace(".csv", "-pivoted.csv"), pivoted_stringified);
+
+	// write countries to a json file for mapping
 	const countries = parsed.map((row) => row[0]).slice(1);
 	const sorted_countries = countries.sort();
 	const countries_map = sorted_countries.reduce((acc, country) => {
 		acc[country] = country;
 		return acc;
 	}, {});
-	writeFileSync("countries2.json", JSON.stringify(countries_map, null, 4));
+	writeFileSync("countries.json", JSON.stringify(countries_map, null, 4));
 };
+
+// https://statbank.hagstova.fo/pxweb/fo/H2/H2__UH__UH01/uh_sitc_t.px/
+const by_month = "https://statbank.hagstova.fo/sq/b2289d76-b001-424d-bae6-0ff473aa0097";
 
 fetch_csv(by_month, "by-month.csv");
