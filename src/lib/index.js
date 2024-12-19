@@ -21,35 +21,12 @@ function parse_csv(csv_string) {
 	return { series, header };
 }
 
-/**
- * @param {string} month_string
- * @returns {number}
- */
-function month_string_to_month_number(month_string) {
-	const month = month_string;
-	const month_number = [
-		"januar",
-		"februar",
-		"mars",
-		"apríl",
-		"mai",
-		"juni",
-		"juli",
-		"august",
-		"september",
-		"oktober",
-		"november",
-		"desember",
-	].indexOf(month);
-	return month_number;
-}
-
 const by_month_data = parse_csv(by_month_csv);
 // by_month_data.header format looks like: 1998M04 meaning year 1998 and month April
-const by_monts_split_header = by_month_data.header.slice(1).map((month) => month.split(" "));
+const by_monts_split_header = by_month_data.header.slice(1).map((month) => month.split("M"));
 const by_month_dates = by_monts_split_header.map((v) => {
 	const year = +v[0];
-	const month = month_string_to_month_number(v[1]);
+	const month = +v[1];
 	const date = new Date(year, month, 0);
 	return date;
 });
@@ -253,6 +230,12 @@ function get_maps(individual_countries_list) {
  * @returns {{data: number[], name: string}}
  */
 function sum_group(group, name) {
+	if (group.length === 0) {
+		return {
+			data: [],
+			name,
+		};
+	}
 	const data = group.reduce((acc, row) => {
 		for (let i = 0; i < row.data.length; i++) {
 			acc[i] += row.data[i];
