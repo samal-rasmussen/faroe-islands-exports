@@ -1,5 +1,6 @@
 import { writeFileSync } from "fs";
-
+import { are_countries_in_country_groups } from "./check.js";
+import path from "path";
 /**
  * @param {string} data
  * @returns {(number | string)[][]}
@@ -56,7 +57,9 @@ const pivot_data = (data) => {
 };
 
 // fetch csv data from the API and write to files
-const fetch_csv = async (url, filename) => {
+const fetch_csv = async (url) => {
+	const filename = path.join(process.cwd(), "src/lib/by-month.csv");
+
 	const response = await fetch(url);
 	const data = await response.text();
 	const parsed = parse_csv(data);
@@ -77,7 +80,10 @@ const fetch_csv = async (url, filename) => {
 		acc[country] = country;
 		return acc;
 	}, {});
-	writeFileSync("src/libs/countries.json", JSON.stringify(countries_map, null, 4));
+	writeFileSync(
+		path.join(process.cwd(), "src/lib/countries.json"),
+		JSON.stringify(countries_map, null, 4),
+	);
 };
 
 /*
@@ -95,4 +101,9 @@ Select "Goym fyrispurning" on the left and select "Semikolonmarkað uttan yvirsk
 */
 const by_month = "https://statbank.hagstova.fo:443/sq/707ee16b-5913-4dbe-a843-43b75380e739";
 
-fetch_csv(by_month, "src/libs/by-month.csv");
+fetch_csv(by_month);
+const valid = are_countries_in_country_groups();
+if (!valid) {
+	console.error("Countries are not valid");
+	process.exit(1);
+}
