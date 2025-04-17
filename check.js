@@ -1,10 +1,12 @@
 import fs from "fs";
+import JSON5 from "json5";
 
 // Read and parse countries.json
 const countriesData = JSON.parse(fs.readFileSync("./src/lib/countries.json", "utf8"));
 
 // Read and parse country-groups.json
-const countryGroupsData = JSON.parse(fs.readFileSync("./src/lib/country-groups.json", "utf8"));
+const countryGroupsFile = fs.readFileSync("./src/lib/country-groups.json5", "utf8");
+const countryGroupsData = JSON5.parse(countryGroupsFile);
 
 // Flatten the country-groups.json data into a single array of country names
 const countryGroupsCountries = Object.values(countryGroupsData).flatMap((group) => {
