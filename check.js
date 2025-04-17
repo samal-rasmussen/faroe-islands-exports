@@ -1,15 +1,15 @@
 import fs from "fs";
 
 // Read and parse countries.json
-const countriesData = JSON.parse(fs.readFileSync("countries.json", "utf8"));
+const countriesData = JSON.parse(fs.readFileSync("./src/lib/countries.json", "utf8"));
 
 // Read and parse country-groups.json
-const countryGroupsData = JSON.parse(fs.readFileSync("country-groups.json", "utf8"));
+const countryGroupsData = JSON.parse(fs.readFileSync("./src/lib/country-groups.json", "utf8"));
 
 // Flatten the country-groups.json data into a single array of country names
-const countryGroupsCountries = Object.values(countryGroupsData).flatMap((group) =>
-	Object.values(group),
-);
+const countryGroupsCountries = Object.values(countryGroupsData).flatMap((group) => {
+	return Object.keys(group);
+});
 
 // Get the list of countries from countries.json
 const countriesList = Object.values(countriesData);

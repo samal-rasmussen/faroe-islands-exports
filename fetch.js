@@ -77,10 +77,22 @@ const fetch_csv = async (url, filename) => {
 		acc[country] = country;
 		return acc;
 	}, {});
-	writeFileSync("countries.json", JSON.stringify(countries_map, null, 4));
+	writeFileSync("src/libs/countries.json", JSON.stringify(countries_map, null, 4));
 };
 
-// https://statbank.hagstova.fo/pxweb/fo/H2/H2__UH__UH01/uh_sitc_t.px/
-const by_month = "https://statbank.hagstova.fo/sq/b2289d76-b001-424d-bae6-0ff473aa0097";
+/*
+UH01026 Inn- og útflutningur skiftur á SITC-vørubólkar og land (1988M01-2025M02)
+https://statbank.hagstova.fo/pxweb/fo/H2/H2__UH__UH01/uh_sitc_t.px/
 
-fetch_csv(by_month, "by-month.csv");
+Rák: Útflutningur
+Mát: Virði
+SITC: Tilsamans
+Land: Vel alt
+Mánaður: Vel alt
+
+To new url for fetching CSV:
+Select "Goym fyrispurning" on the left and select "Semikolonmarkað uttan yvirskrift"
+*/
+const by_month = "https://statbank.hagstova.fo:443/sq/707ee16b-5913-4dbe-a843-43b75380e739";
+
+fetch_csv(by_month, "src/libs/by-month.csv");
