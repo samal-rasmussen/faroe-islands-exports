@@ -1,0 +1,4 @@
+{
+	"editor.formatOnSave": true,
+	"json5.format.trailingCommas": "all"
+}

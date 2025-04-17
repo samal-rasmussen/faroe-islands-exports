@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 import by_month_csv from "$lib/by-month.csv?raw";
-import groups from "$lib/country-groups.json";
+import groups from "$lib/country-groups.json5";
 
 /**
  * @param {string} csv_string
