@@ -134,9 +134,6 @@
 	}
 </script>
 
-<div bind:this={main_chart_div}></div>
-<div bind:this={brush_chart_div}></div>
-
 <select
 	bind:value={selected_range}
 	onchange={() => {
@@ -157,6 +154,9 @@
 	<a href="/by-month-table/half-year">Hálvár</a>,
 	<a href="/by-month-table/years">Ár</a>
 </span>
+
+<div bind:this={main_chart_div}></div>
+<div bind:this={brush_chart_div}></div>
 
 <style>
 </style>
