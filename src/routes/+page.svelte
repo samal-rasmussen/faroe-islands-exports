@@ -17,9 +17,10 @@
 
 	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
 
-	function get_series(series: { data: number[]; name: string }): ApexAxisChartSeries {
+	function get_series(series: { data: number[]; name: string }): ApexAxisChartSeries[number] {
 		return {
 			name: series.name,
+			// @ts-ignore
 			data: series.data.map((x, i) => [dates[i], x]),
 		};
 	}
