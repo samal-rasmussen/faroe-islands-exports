@@ -40,8 +40,7 @@
 	const main_chart_options = {
 		chart: {
 			id: "main_chart",
-			height: 640,
-			width: "100%",
+			height: "100%",
 			type: "line",
 			animations: {
 				initialAnimation: {
@@ -67,7 +66,7 @@
 		series: [get_series(all_series)],
 		chart: {
 			id: "brush_chart",
-			height: 130,
+			height: "100%",
 			type: "area",
 			brush: {
 				target: "main_chart",
@@ -134,29 +133,80 @@
 	}
 </script>
 
-<select
-	bind:value={selected_range}
-	onchange={() => {
-		update_selected_range();
-		update_chart();
-	}}
->
-	<option value="months">Mánaða</option>
-	<option value="quarters">ársfjóring</option>
-	<option value="half-year">Hálvár</option>
-	<option value="years">Ár</option>
-</select>
+<div class="full-height-container">
+	<div class="controls">
+		<select
+			bind:value={selected_range}
+			onchange={() => {
+				update_selected_range();
+				update_chart();
+			}}
+		>
+			<option value="months">Mánaða</option>
+			<option value="quarters">ársfjóring</option>
+			<option value="half-year">Hálvár</option>
+			<option value="years">Ár</option>
+		</select>
 
-<span>
-	Tabellir við øllum data per:
-	<a href="/by-month-table/months">Mánaða</a>,
-	<a href="/by-month-table/quarters">ársfjóring</a>,
-	<a href="/by-month-table/half-year">Hálvár</a>,
-	<a href="/by-month-table/years">Ár</a>
-</span>
+		<span>
+			Tabellir við øllum data per:
+			<a href="/by-month-table/months">Mánaða</a>,
+			<a href="/by-month-table/quarters">ársfjóring</a>,
+			<a href="/by-month-table/half-year">Hálvár</a>,
+			<a href="/by-month-table/years">Ár</a>
+		</span>
+	</div>
 
-<div bind:this={main_chart_div}></div>
-<div bind:this={brush_chart_div}></div>
+	<div class="content">
+		<div class="main-chart-wrapper">
+			<div bind:this={main_chart_div}></div>
+		</div>
+		<div class="brush-chart-wrapper">
+			<div bind:this={brush_chart_div}></div>
+		</div>
+	</div>
+</div>
 
 <style>
+	:global(body) {
+		margin: 0;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.full-height-container {
+		height: 100vh;
+		max-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.controls {
+		padding: 1rem;
+		flex-shrink: 0;
+		display: flex;
+		gap: 1rem;
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		overflow-y: auto;
+		padding-right: 0.6rem;
+		padding-bottom: 2rem;
+	}
+
+	.main-chart-wrapper {
+		flex-grow: 1;
+		min-height: 200px;
+		max-height: 1000px;
+		width: 100%;
+	}
+
+	.brush-chart-wrapper {
+		height: 120px;
+		width: 100%;
+	}
 </style>
