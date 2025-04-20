@@ -8,12 +8,7 @@
 
 	let selected_range = $state($page.params.range as Range);
 
-	function handleRangeChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		goto(`/by-month-table/${target.value}`);
-	}
-
-	let filtered_data = $derived(
+	const filtered_data = $derived(
 		filter_data()[
 			selected_range === "months"
 				? "months_data"
@@ -49,7 +44,13 @@
 <div style="display: flex; flex-direction: column; gap: 1rem;">
 	<div>
 		<label for="range-select">Select Range:</label>
-		<select id="range-select" bind:value={selected_range} onchange={handleRangeChange}>
+		<select
+			id="range-select"
+			bind:value={selected_range}
+			onchange={() => {
+				goto(`/by-month-table/${selected_range}`);
+			}}
+		>
 			{#each ranges as option}
 				<option value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</option>
 			{/each}
