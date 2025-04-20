@@ -294,21 +294,7 @@ interface DataWithDates extends Data {
 	dates: Date[];
 }
 
-export async function filter_data(
-	individual_countries_list = [
-		"Danmark",
-		"Sambandsríki Amerika (USA)",
-		"Kina",
-		"Russland",
-		"Bretland",
-		"Týskland",
-		"Frakland",
-		"Spania",
-		"Niðurlond",
-		"Ísland",
-		"Pólland",
-	],
-): Promise<{
+export async function filter_data(individual_countries_list: string[] = []): Promise<{
 	months_data: DataWithDates;
 	quarters_data: DataWithDates;
 	half_year_data: DataWithDates;

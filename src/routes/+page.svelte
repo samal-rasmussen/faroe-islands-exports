@@ -26,7 +26,19 @@
 	}
 
 	onMount(async () => {
-		data = await filter_data();
+		data = await filter_data([
+			"Danmark",
+			"Sambandsríki Amerika (USA)",
+			"Kina",
+			"Russland",
+			"Bretland",
+			"Týskland",
+			"Frakland",
+			"Spania",
+			"Niðurlond",
+			"Ísland",
+			"Pólland",
+		]);
 		update_selected_range();
 		const max_date = dates[dates.length - 1];
 		const six_years_back = new Date();
