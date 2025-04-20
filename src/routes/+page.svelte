@@ -3,18 +3,18 @@
 	import { filter_data } from "$lib";
 
 	/**
-	 * @type {HTMLDivElement}
+	 * @type {HTMLDivElement | undefined}
 	 */
-	let main_chart_div;
+	let main_chart_div = $state();
 
 	/**
-	 * @type {HTMLDivElement}
+	 * @type {HTMLDivElement | undefined}
 	 */
-	let brush_chart_div;
+	let brush_chart_div = $state();
 
 	const { months_data, quarters_data, half_year_data, years_data } = filter_data();
 
-	let selected_range = "years";
+	let selected_range = $state("years");
 	/** @type {Date[]} */
 	let dates = [];
 	/** @type {{data: number[], name: string}[]} */
@@ -141,7 +141,7 @@
 
 <select
 	bind:value={selected_range}
-	on:change={() => {
+	onchange={() => {
 		update_selected_range();
 		update_chart();
 	}}
