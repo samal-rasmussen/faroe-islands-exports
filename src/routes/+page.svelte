@@ -131,8 +131,6 @@
 		brush_chart_options.series = [get_series(all_series)];
 		main_chart.updateOptions(main_chart_options);
 		brush_chart.updateOptions(brush_chart_options);
-		main_chart.render();
-		brush_chart.render();
 	}
 </script>
 
