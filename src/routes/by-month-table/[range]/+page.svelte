@@ -2,7 +2,7 @@
 	import { run } from "svelte/legacy";
 
 	import { page } from "$app/stores";
-	import { filter_data } from "$lib";
+	import { filter_data } from "$lib/filter-data";
 	import { goto } from "$app/navigation";
 	import { ranges, type Range } from "./shared";
 
