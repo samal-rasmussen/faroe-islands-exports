@@ -1,17 +1,19 @@
 <script lang="ts">
+	import { run } from "svelte/legacy";
+
 	import { page } from "$app/stores";
 	import { filter_data } from "$lib";
 	import { goto } from "$app/navigation";
 	import { ranges, type Range } from "./shared";
 
-	let selected_range = $page.params.range as Range;
+	let selected_range = $state($page.params.range as Range);
 
 	function handleRangeChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		goto(`/by-month-table/${target.value}`);
 	}
 
-	$: filtered_data =
+	let filtered_data = $derived(
 		filter_data()[
 			selected_range === "months"
 				? "months_data"
@@ -20,9 +22,10 @@
 					: selected_range === "half-year"
 						? "half_year_data"
 						: "years_data"
-		];
-	$: {
-		header = filtered_data.header;
+		],
+	);
+	const header = $derived(filtered_data.header);
+	const rows = $derived.by(() => {
 		let calculated_rows = [
 			filtered_data.all_series,
 			...filtered_data.series,
@@ -39,17 +42,14 @@
 			if (a_last === undefined || b_last === undefined) return 0;
 			return b_last - a_last;
 		});
-		rows = calculated_rows;
-	}
-
-	let header: string[] = [];
-	let rows: { name: string; data: number[] }[] = [];
+		return calculated_rows;
+	});
 </script>
 
 <div style="display: flex; flex-direction: column; gap: 1rem;">
 	<div>
 		<label for="range-select">Select Range:</label>
-		<select id="range-select" bind:value={selected_range} on:change={handleRangeChange}>
+		<select id="range-select" bind:value={selected_range} onchange={handleRangeChange}>
 			{#each ranges as option}
 				<option value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</option>
 			{/each}
