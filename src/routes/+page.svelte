@@ -183,18 +183,18 @@
 				update_chart();
 			}}
 		>
-			<optgroup label="Standard periods">
+			<optgroup label="Føst kalendara tíðarskeið">
 				<option value="months">Mánaða</option>
 				<option value="quarters">ársfjóring</option>
 				<option value="half-year">Hálvár</option>
 				<option value="years">Ár</option>
 			</optgroup>
-			<optgroup label="Fixed periods from most recent data">
+			<optgroup label="Føst tíðarskeið frá nýggjastu data av">
 				<option value="last-3-months">Seinastu 3 mánaðir</option>
 				<option value="last-6-months">Seinastu 6 mánaðir</option>
 				<option value="last-12-months">Seinastu 12 mánaðir</option>
 			</optgroup>
-			<optgroup label="Rolling periods">
+			<optgroup label="Mánaði við rullandi tíðarskeið">
 				<option value="rolling-3-months">Rullandi 3 mánaðir</option>
 				<option value="rolling-6-months">Rullandi 6 mánaðir</option>
 				<option value="rolling-12-months">Rullandi 12 mánaðir</option>
