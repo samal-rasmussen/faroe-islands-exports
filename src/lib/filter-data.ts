@@ -163,6 +163,115 @@ function create_last_n_months_data(
 	return { name: series.name, data, header };
 }
 
+function filter_data_internal(
+	series: { data: number[]; name: string }[],
+	header: string[],
+	maps: ReturnType<typeof get_maps>,
+) {
+	const {
+		individual_countries_map,
+		nordics_map,
+		europe_map,
+		asia_map,
+		africa_map,
+		americas_map,
+	} = maps;
+	const individual_countries = series.filter((row) => individual_countries_map.has(row.name));
+	const nordics = series.filter(
+		(row) => nordics_map.has(row.name) && !individual_countries_map.has(row.name),
+	);
+	const europe = series.filter(
+		(row) => europe_map.has(row.name) && !individual_countries_map.has(row.name),
+	);
+	const asia = series.filter(
+		(row) => asia_map.has(row.name) && !individual_countries_map.has(row.name),
+	);
+	const africa = series.filter(
+		(row) => africa_map.has(row.name) && !individual_countries_map.has(row.name),
+	);
+	const americas = series.filter(
+		(row) => americas_map.has(row.name) && !individual_countries_map.has(row.name),
+	);
+
+	const nordics_group = sum_group(nordics, "Norðurlond");
+	const europe_group = sum_group(europe, "Evropa");
+	const asia_group = sum_group(asia, "Asia");
+	const africa_group = sum_group(africa, "Afrika");
+	const americas_group = sum_group(americas, "Amerika");
+	const all_series = sum_group(series, "Tilsamans");
+
+	return {
+		header: structuredClone(header),
+		series: [
+			...individual_countries,
+			nordics_group,
+			europe_group,
+			asia_group,
+			africa_group,
+			americas_group,
+		],
+		individual_series: [
+			...individual_countries,
+			...nordics,
+			...europe,
+			...asia,
+			...africa,
+			...americas,
+		],
+		all_series,
+	};
+}
+
+function get_maps(individual_countries_list: string[]) {
+	const individual_countries_map = new Map(
+		individual_countries_list.map((country) => [country, true]),
+	);
+	const nordics_map = new Map(Object.entries(groups.nordics));
+	const europe_map = new Map(Object.entries(groups.europe));
+	const asia_map = new Map(Object.entries(groups["asia-middle-east-oceania"]));
+	const africa_map = new Map(Object.entries(groups.africa));
+	const americas_map = new Map(Object.entries(groups.americas));
+
+	// return all maps
+	return {
+		individual_countries_map,
+		nordics_map,
+		europe_map,
+		asia_map,
+		africa_map,
+		americas_map,
+	};
+}
+
+function sum_group(
+	group: { data: number[]; name: string }[],
+	name: string,
+): {
+	data: number[];
+	name: string;
+} {
+	if (group.length === 0) {
+		return {
+			data: [],
+			name,
+		};
+	}
+	const data = group.reduce((acc, row) => {
+		for (let i = 0; i < row.data.length; i++) {
+			acc[i] += row.data[i];
+		}
+		return acc;
+	}, new Array(group[0].data.length).fill(0));
+
+	data.forEach((value, i) => {
+		data[i] = Math.round(value * 100) / 100;
+	});
+	return {
+		data,
+		name,
+	};
+}
+
 export function filter_data(
 	individual_countries_list = [
 		"Danmark",
@@ -333,114 +442,5 @@ export function filter_data(
 			...last_12_months_data,
 			dates: last_12_months_dates,
 		},
-	};
-}
-
-function filter_data_internal(
-	series: { data: number[]; name: string }[],
-	header: string[],
-	maps: ReturnType<typeof get_maps>,
-) {
-	const {
-		individual_countries_map,
-		nordics_map,
-		europe_map,
-		asia_map,
-		africa_map,
-		americas_map,
-	} = maps;
-	const individual_countries = series.filter((row) => individual_countries_map.has(row.name));
-	const nordics = series.filter(
-		(row) => nordics_map.has(row.name) && !individual_countries_map.has(row.name),
-	);
-	const europe = series.filter(
-		(row) => europe_map.has(row.name) && !individual_countries_map.has(row.name),
-	);
-	const asia = series.filter(
-		(row) => asia_map.has(row.name) && !individual_countries_map.has(row.name),
-	);
-	const africa = series.filter(
-		(row) => africa_map.has(row.name) && !individual_countries_map.has(row.name),
-	);
-	const americas = series.filter(
-		(row) => americas_map.has(row.name) && !individual_countries_map.has(row.name),
-	);
-
-	const nordics_group = sum_group(nordics, "Norðurlond");
-	const europe_group = sum_group(europe, "Evropa");
-	const asia_group = sum_group(asia, "Asia");
-	const africa_group = sum_group(africa, "Afrika");
-	const americas_group = sum_group(americas, "Amerika");
-	const all_series = sum_group(series, "Tilsamans");
-
-	return {
-		header: structuredClone(header),
-		series: [
-			...individual_countries,
-			nordics_group,
-			europe_group,
-			asia_group,
-			africa_group,
-			americas_group,
-		],
-		individual_series: [
-			...individual_countries,
-			...nordics,
-			...europe,
-			...asia,
-			...africa,
-			...americas,
-		],
-		all_series,
-	};
-}
-
-function get_maps(individual_countries_list: string[]) {
-	const individual_countries_map = new Map(
-		individual_countries_list.map((country) => [country, true]),
-	);
-	const nordics_map = new Map(Object.entries(groups.nordics));
-	const europe_map = new Map(Object.entries(groups.europe));
-	const asia_map = new Map(Object.entries(groups["asia-middle-east-oceania"]));
-	const africa_map = new Map(Object.entries(groups.africa));
-	const americas_map = new Map(Object.entries(groups.americas));
-
-	// return all maps
-	return {
-		individual_countries_map,
-		nordics_map,
-		europe_map,
-		asia_map,
-		africa_map,
-		americas_map,
-	};
-}
-
-function sum_group(
-	group: { data: number[]; name: string }[],
-	name: string,
-): {
-	data: number[];
-	name: string;
-} {
-	if (group.length === 0) {
-		return {
-			data: [],
-			name,
-		};
-	}
-	const data = group.reduce((acc, row) => {
-		for (let i = 0; i < row.data.length; i++) {
-			acc[i] += row.data[i];
-		}
-		return acc;
-	}, new Array(group[0].data.length).fill(0));
-
-	data.forEach((value, i) => {
-		data[i] = Math.round(value * 100) / 100;
-	});
-	return {
-		data,
-		name,
 	};
 }
