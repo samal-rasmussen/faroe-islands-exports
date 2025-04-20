@@ -20,13 +20,14 @@ function parse_csv(csv_string: string): {
 			name: data[i][0],
 		});
 	}
-	const header = data.shift() as string[];
+	const raw_header = data.shift() as string[];
+	const header = raw_header.slice(1);
 	return { series, header };
 }
 
 const by_month_data = parse_csv(by_month_csv);
 // by_month_data.header format looks like: 1998M04 meaning year 1998 and month April
-const by_monts_split_header = by_month_data.header.slice(1).map((month) => month.split("M"));
+const by_monts_split_header = by_month_data.header.map((month) => month.split("M"));
 const by_month_dates = by_monts_split_header.map((v) => {
 	const year = +v[0];
 	const month = +v[1];
