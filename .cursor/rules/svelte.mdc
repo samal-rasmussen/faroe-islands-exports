@@ -1,0 +1,9 @@
+---
+description: 
+globs: *.svelte
+alwaysApply: false
+---
+
+# This are the rules for svelte files
+
+- Always use Svelte 5 syntax with runes and snippets
