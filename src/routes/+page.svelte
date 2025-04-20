@@ -202,11 +202,7 @@
 		</select>
 
 		<span>
-			Tabellir við øllum data per:
-			<a href="/by-month-table/months">Mánaða</a>,
-			<a href="/by-month-table/quarters">ársfjóring</a>,
-			<a href="/by-month-table/half-year">Hálvár</a>,
-			<a href="/by-month-table/years">Ár</a>
+			<a href="/by-month-table/months">Tabell við øllum data</a>
 		</span>
 	</div>
 
