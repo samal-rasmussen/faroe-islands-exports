@@ -60,6 +60,17 @@
 		xaxis: {
 			type: "datetime",
 		},
+		yaxis: {
+			labels: {
+				offsetX: -15,
+			},
+		},
+		grid: {
+			padding: {
+				left: -5,
+				right: 5,
+			},
+		},
 	};
 
 	const brush_chart_options = {
@@ -95,7 +106,14 @@
 			},
 		},
 		yaxis: {
-			tickAmount: 2,
+			labels: {
+				offsetX: -15,
+			},
+		},
+		grid: {
+			padding: {
+				left: -5,
+			},
 		},
 	};
 
@@ -194,8 +212,7 @@
 		flex-direction: column;
 		flex-grow: 1;
 		overflow-y: auto;
-		padding-right: 0.6rem;
-		padding-bottom: 2rem;
+		padding: 0 1.5rem 2rem 1.5rem;
 	}
 
 	.main-chart-wrapper {
