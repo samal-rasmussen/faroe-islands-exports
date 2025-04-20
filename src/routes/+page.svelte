@@ -12,7 +12,18 @@
 	 */
 	let brush_chart_div = $state();
 
-	const { months_data, quarters_data, half_year_data, years_data } = filter_data();
+	const {
+		months_data,
+		quarters_data,
+		half_year_data,
+		years_data,
+		rolling_3_months_data,
+		rolling_6_months_data,
+		rolling_12_months_data,
+		last_3_months_data,
+		last_6_months_data,
+		last_12_months_data,
+	} = filter_data();
 
 	let selected_range = $state("years");
 	/** @type {Date[]} */
@@ -140,6 +151,18 @@
 			({ dates, series, all_series } = half_year_data);
 		} else if (selected_range === "years") {
 			({ dates, series, all_series } = years_data);
+		} else if (selected_range === "rolling-3-months") {
+			({ dates, series, all_series } = rolling_3_months_data);
+		} else if (selected_range === "rolling-6-months") {
+			({ dates, series, all_series } = rolling_6_months_data);
+		} else if (selected_range === "rolling-12-months") {
+			({ dates, series, all_series } = rolling_12_months_data);
+		} else if (selected_range === "last-3-months") {
+			({ dates, series, all_series } = last_3_months_data);
+		} else if (selected_range === "last-6-months") {
+			({ dates, series, all_series } = last_6_months_data);
+		} else if (selected_range === "last-12-months") {
+			({ dates, series, all_series } = last_12_months_data);
 		}
 	}
 
@@ -160,10 +183,22 @@
 				update_chart();
 			}}
 		>
-			<option value="months">Mánaða</option>
-			<option value="quarters">ársfjóring</option>
-			<option value="half-year">Hálvár</option>
-			<option value="years">Ár</option>
+			<optgroup label="Standard periods">
+				<option value="months">Mánaða</option>
+				<option value="quarters">ársfjóring</option>
+				<option value="half-year">Hálvár</option>
+				<option value="years">Ár</option>
+			</optgroup>
+			<optgroup label="Fixed periods from most recent data">
+				<option value="last-3-months">Seinastu 3 mánaðir</option>
+				<option value="last-6-months">Seinastu 6 mánaðir</option>
+				<option value="last-12-months">Seinastu 12 mánaðir</option>
+			</optgroup>
+			<optgroup label="Rolling periods">
+				<option value="rolling-3-months">Rullandi 3 mánaðir</option>
+				<option value="rolling-6-months">Rullandi 6 mánaðir</option>
+				<option value="rolling-12-months">Rullandi 12 mánaðir</option>
+			</optgroup>
 		</select>
 
 		<span>
@@ -188,8 +223,6 @@
 <style>
 	:global(body) {
 		margin: 0;
-		height: 100vh;
-		overflow: hidden;
 	}
 
 	.full-height-container {
