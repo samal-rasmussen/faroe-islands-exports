@@ -3,21 +3,19 @@
 import by_month_csv from "$lib/by-month.csv?raw";
 import groups from "$lib/country-groups.json5";
 
-/**
- * @param {string} csv_string
- * @returns {{series: {data: number[], name: string}[], header: string[]}}
- */
-function parse_csv(csv_string) {
+function parse_csv(csv_string: string): {
+	series: { data: number[]; name: string }[];
+	header: string[];
+} {
 	const data = csv_string.split("\n").map((row) => row.split(";"));
-	/** @type {{data: number[], name: string}[]} */
-	const series = [];
+	const series: { data: number[]; name: string }[] = [];
 	for (let i = 1; i < data.length; i++) {
 		series.push({
 			data: data[i].slice(1).map((cell) => +cell),
 			name: data[i][0],
 		});
 	}
-	const header = /** @type {string[]} */ (data.shift());
+	const header = data.shift() as string[];
 	return { series, header };
 }
 
@@ -36,19 +34,20 @@ const by_quarter_dates = by_month_dates.filter((date) => date.getMonth() % 3 ===
 const by_half_year_dates = by_month_dates.filter((date) => date.getMonth() % 6 === 0);
 const by_year_dates = by_month_dates.filter((date) => date.getMonth() === 0);
 
-/**
- * @param {{data: number[], name: string}} series
- * @param {number} period
- * @returns {{data: number[], name: string, header: string[]}}
- */
-function aggregate_period_data(series, period) {
+function aggregate_period_data(
+	series: { data: number[]; name: string },
+	period: number,
+): {
+	data: number[];
+	name: string;
+	header: string[];
+} {
 	if (period !== 3 && period !== 6 && period !== 12) {
 		throw new Error("Period must be 3, 6, or 12");
 	}
 	// Aggregate data by period
-	const data = [];
-	/** @type {string[]} */
-	const header = [];
+	const data: number[] = [];
+	const header: string[] = [];
 	const offset = first_month % period;
 	// Skip partial period at start if needed
 	const start = offset === 0 ? 0 : period - offset;
@@ -76,18 +75,21 @@ function aggregate_period_data(series, period) {
 
 /**
  * Creates a sliding window of the specified number of months
- * @param {{data: number[], name: string}} series
- * @param {number} months_window
- * @returns {{data: number[], name: string, header: string[]}}
  */
-function create_rolling_window_data(series, months_window) {
+function create_rolling_window_data(
+	series: { data: number[]; name: string },
+	months_window: number,
+): {
+	data: number[];
+	name: string;
+	header: string[];
+} {
 	if (months_window !== 3 && months_window !== 6 && months_window !== 12) {
 		throw new Error("Window size must be 3, 6, or 12");
 	}
 
-	const data = [];
-	/** @type {string[]} */
-	const header = [];
+	const data: number[] = [];
+	const header: string[] = [];
 
 	// Start from the end of the data and work backwards
 	for (let i = series.data.length - months_window; i >= 0; i--) {
@@ -120,14 +122,20 @@ function create_rolling_window_data(series, months_window) {
  * @param {number} period
  * @returns {{data: number[], name: string, header: string[]}}
  */
-function create_last_n_months_data(series, period) {
+function create_last_n_months_data(
+	series: { data: number[]; name: string },
+	period: number,
+): {
+	data: number[];
+	name: string;
+	header: string[];
+} {
 	if (period !== 3 && period !== 6 && period !== 12) {
 		throw new Error("Period must be 3, 6, or 12");
 	}
 
-	const data = [];
-	/** @type {string[]} */
-	const header = [];
+	const data: number[] = [];
+	const header: string[] = [];
 
 	// Process data in chunks starting from the end of the data
 	for (let i = series.data.length; i >= period; i -= period) {
@@ -155,9 +163,6 @@ function create_last_n_months_data(series, period) {
 	return { name: series.name, data, header };
 }
 
-/**
- * @param {string[]} individual_countries_list
- */
 export function filter_data(
 	individual_countries_list = [
 		"Danmark",
@@ -274,12 +279,8 @@ export function filter_data(
 	});
 
 	// Create dates for last N months
-	/**
-	 * @param {number} period - The period size in months
-	 * @returns {Date[]} Array of dates
-	 */
-	const create_last_n_months_dates = (period) => {
-		const dates = [];
+	const create_last_n_months_dates = (period: number): Date[] => {
+		const dates: Date[] = [];
 		for (let i = by_month_dates.length; i >= period; i -= period) {
 			const date = new Date(by_month_dates[i - 1]);
 			dates.unshift(date);
@@ -335,12 +336,11 @@ export function filter_data(
 	};
 }
 
-/**
- * @param {{data: number[], name: string}[]} series
- * @param {string[]} header
- * @param {ReturnType<get_maps>} maps
- */
-function filter_data_internal(series, header, maps) {
+function filter_data_internal(
+	series: { data: number[]; name: string }[],
+	header: string[],
+	maps: ReturnType<typeof get_maps>,
+) {
 	const {
 		individual_countries_map,
 		nordics_map,
@@ -395,10 +395,7 @@ function filter_data_internal(series, header, maps) {
 	};
 }
 
-/**
- * @param {string[]} individual_countries_list
- */
-function get_maps(individual_countries_list) {
+function get_maps(individual_countries_list: string[]) {
 	const individual_countries_map = new Map(
 		individual_countries_list.map((country) => [country, true]),
 	);
@@ -419,12 +416,13 @@ function get_maps(individual_countries_list) {
 	};
 }
 
-/**
- * @param {{data: number[], name: string}[]} group
- * @param {string} name
- * @returns {{data: number[], name: string}}
- */
-function sum_group(group, name) {
+function sum_group(
+	group: { data: number[]; name: string }[],
+	name: string,
+): {
+	data: number[];
+	name: string;
+} {
 	if (group.length === 0) {
 		return {
 			data: [],
