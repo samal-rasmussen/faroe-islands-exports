@@ -3,6 +3,11 @@
 import by_month_csv from "$lib/by-month.csv?raw";
 import groups from "$lib/country-groups.json5";
 
+export type Serie = {
+	data: number[];
+	name: string;
+};
+
 function parse_csv(csv_string: string): {
 	series: { data: number[]; name: string }[];
 	header: string[];
@@ -164,10 +169,15 @@ function create_last_n_months_data(
 }
 
 function filter_data_internal(
-	series: { data: number[]; name: string }[],
+	series: Serie[],
 	header: string[],
 	maps: ReturnType<typeof get_maps>,
-) {
+): {
+	header: string[];
+	series: Serie[];
+	individual_series: Serie[];
+	all_series: Serie;
+} {
 	const {
 		individual_countries_map,
 		nordics_map,
@@ -272,7 +282,18 @@ function sum_group(
 	};
 }
 
-export function filter_data(
+interface Data {
+	header: string[];
+	series: Serie[];
+	individual_series: Serie[];
+	all_series: Serie;
+}
+
+interface DataWithDates extends Data {
+	dates: Date[];
+}
+
+export async function filter_data(
 	individual_countries_list = [
 		"Danmark",
 		"Sambandsríki Amerika (USA)",
@@ -286,161 +307,178 @@ export function filter_data(
 		"Ísland",
 		"Pólland",
 	],
-) {
-	const maps = get_maps(individual_countries_list);
+): Promise<{
+	months_data: DataWithDates;
+	quarters_data: DataWithDates;
+	half_year_data: DataWithDates;
+	years_data: DataWithDates;
+	rolling_3_months_data: DataWithDates;
+	rolling_6_months_data: DataWithDates;
+	rolling_12_months_data: DataWithDates;
+	last_3_months_data: DataWithDates;
+	last_6_months_data: DataWithDates;
+	last_12_months_data: DataWithDates;
+}> {
+	return new Promise((resolve) => {
+		const maps = get_maps(individual_countries_list);
 
-	const months_data = filter_data_internal(by_month_data.series, by_month_data.header, maps);
-	const quarters_data = {
-		header: aggregate_period_data(months_data.all_series, 3).header,
-		series: months_data.series.map((series) => aggregate_period_data(series, 3)),
-		individual_series: months_data.individual_series.map((series) =>
-			aggregate_period_data(series, 3),
-		),
-		all_series: aggregate_period_data(months_data.all_series, 3),
-	};
-	const half_year_data = {
-		header: aggregate_period_data(months_data.all_series, 6).header,
-		series: months_data.series.map((series) => aggregate_period_data(series, 6)),
-		individual_series: months_data.individual_series.map((series) =>
-			aggregate_period_data(series, 6),
-		),
-		all_series: aggregate_period_data(months_data.all_series, 6),
-	};
-	const years_data = {
-		header: aggregate_period_data(months_data.all_series, 12).header,
-		series: months_data.series.map((series) => aggregate_period_data(series, 12)),
-		individual_series: months_data.individual_series.map((series) =>
-			aggregate_period_data(series, 12),
-		),
-		all_series: aggregate_period_data(months_data.all_series, 12),
-	};
+		const months_data: Data = filter_data_internal(
+			by_month_data.series,
+			by_month_data.header,
+			maps,
+		);
+		const quarters_data: Data = {
+			header: aggregate_period_data(months_data.all_series, 3).header,
+			series: months_data.series.map((series) => aggregate_period_data(series, 3)),
+			individual_series: months_data.individual_series.map((series) =>
+				aggregate_period_data(series, 3),
+			),
+			all_series: aggregate_period_data(months_data.all_series, 3),
+		};
+		const half_year_data: Data = {
+			header: aggregate_period_data(months_data.all_series, 6).header,
+			series: months_data.series.map((series) => aggregate_period_data(series, 6)),
+			individual_series: months_data.individual_series.map((series) =>
+				aggregate_period_data(series, 6),
+			),
+			all_series: aggregate_period_data(months_data.all_series, 6),
+		};
+		const years_data: Data = {
+			header: aggregate_period_data(months_data.all_series, 12).header,
+			series: months_data.series.map((series) => aggregate_period_data(series, 12)),
+			individual_series: months_data.individual_series.map((series) =>
+				aggregate_period_data(series, 12),
+			),
+			all_series: aggregate_period_data(months_data.all_series, 12),
+		};
 
-	// Create sliding window data for rolling averages
-	const rolling_3_months_data = {
-		header: create_rolling_window_data(months_data.all_series, 3).header,
-		series: months_data.series.map((series) => create_rolling_window_data(series, 3)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_rolling_window_data(series, 3),
-		),
-		all_series: create_rolling_window_data(months_data.all_series, 3),
-	};
+		// Create sliding window data for rolling averages
+		const rolling_3_months_data: Data = {
+			header: create_rolling_window_data(months_data.all_series, 3).header,
+			series: months_data.series.map((series) => create_rolling_window_data(series, 3)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_rolling_window_data(series, 3),
+			),
+			all_series: create_rolling_window_data(months_data.all_series, 3),
+		};
 
-	const rolling_6_months_data = {
-		header: create_rolling_window_data(months_data.all_series, 6).header,
-		series: months_data.series.map((series) => create_rolling_window_data(series, 6)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_rolling_window_data(series, 6),
-		),
-		all_series: create_rolling_window_data(months_data.all_series, 6),
-	};
+		const rolling_6_months_data: Data = {
+			header: create_rolling_window_data(months_data.all_series, 6).header,
+			series: months_data.series.map((series) => create_rolling_window_data(series, 6)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_rolling_window_data(series, 6),
+			),
+			all_series: create_rolling_window_data(months_data.all_series, 6),
+		};
 
-	const rolling_12_months_data = {
-		header: create_rolling_window_data(months_data.all_series, 12).header,
-		series: months_data.series.map((series) => create_rolling_window_data(series, 12)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_rolling_window_data(series, 12),
-		),
-		all_series: create_rolling_window_data(months_data.all_series, 12),
-	};
+		const rolling_12_months_data: Data = {
+			header: create_rolling_window_data(months_data.all_series, 12).header,
+			series: months_data.series.map((series) => create_rolling_window_data(series, 12)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_rolling_window_data(series, 12),
+			),
+			all_series: create_rolling_window_data(months_data.all_series, 12),
+		};
 
-	// Create data for last N months as fixed periods
-	const last_3_months_data = {
-		header: create_last_n_months_data(months_data.all_series, 3).header,
-		series: months_data.series.map((series) => create_last_n_months_data(series, 3)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_last_n_months_data(series, 3),
-		),
-		all_series: create_last_n_months_data(months_data.all_series, 3),
-	};
+		// Create data for last N months as fixed periods
+		const last_3_months_data: Data = {
+			header: create_last_n_months_data(months_data.all_series, 3).header,
+			series: months_data.series.map((series) => create_last_n_months_data(series, 3)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_last_n_months_data(series, 3),
+			),
+			all_series: create_last_n_months_data(months_data.all_series, 3),
+		};
 
-	const last_6_months_data = {
-		header: create_last_n_months_data(months_data.all_series, 6).header,
-		series: months_data.series.map((series) => create_last_n_months_data(series, 6)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_last_n_months_data(series, 6),
-		),
-		all_series: create_last_n_months_data(months_data.all_series, 6),
-	};
+		const last_6_months_data: Data = {
+			header: create_last_n_months_data(months_data.all_series, 6).header,
+			series: months_data.series.map((series) => create_last_n_months_data(series, 6)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_last_n_months_data(series, 6),
+			),
+			all_series: create_last_n_months_data(months_data.all_series, 6),
+		};
 
-	const last_12_months_data = {
-		header: create_last_n_months_data(months_data.all_series, 12).header,
-		series: months_data.series.map((series) => create_last_n_months_data(series, 12)),
-		individual_series: months_data.individual_series.map((series) =>
-			create_last_n_months_data(series, 12),
-		),
-		all_series: create_last_n_months_data(months_data.all_series, 12),
-	};
+		const last_12_months_data: Data = {
+			header: create_last_n_months_data(months_data.all_series, 12).header,
+			series: months_data.series.map((series) => create_last_n_months_data(series, 12)),
+			individual_series: months_data.individual_series.map((series) =>
+				create_last_n_months_data(series, 12),
+			),
+			all_series: create_last_n_months_data(months_data.all_series, 12),
+		};
 
-	// Create dates for rolling windows
-	const rolling_3_months_dates = by_month_dates.slice(2).map((date, i) => {
-		const new_date = new Date(date);
-		return new_date;
+		// Create dates for rolling windows
+		const rolling_3_months_dates = by_month_dates.slice(2).map((date, i) => {
+			const new_date = new Date(date);
+			return new_date;
+		});
+
+		const rolling_6_months_dates = by_month_dates.slice(5).map((date, i) => {
+			const new_date = new Date(date);
+			return new_date;
+		});
+
+		const rolling_12_months_dates = by_month_dates.slice(11).map((date, i) => {
+			const new_date = new Date(date);
+			return new_date;
+		});
+
+		// Create dates for last N months
+		const create_last_n_months_dates = (period: number): Date[] => {
+			const dates: Date[] = [];
+			for (let i = by_month_dates.length; i >= period; i -= period) {
+				const date = new Date(by_month_dates[i - 1]);
+				dates.unshift(date);
+			}
+			return dates;
+		};
+
+		const last_3_months_dates = create_last_n_months_dates(3);
+		const last_6_months_dates = create_last_n_months_dates(6);
+		const last_12_months_dates = create_last_n_months_dates(12);
+
+		resolve({
+			months_data: {
+				...months_data,
+				dates: by_month_dates,
+			},
+			quarters_data: {
+				...quarters_data,
+				dates: by_quarter_dates,
+			},
+			half_year_data: {
+				...half_year_data,
+				dates: by_half_year_dates,
+			},
+			years_data: {
+				...years_data,
+				dates: by_year_dates,
+			},
+			rolling_3_months_data: {
+				...rolling_3_months_data,
+				dates: rolling_3_months_dates,
+			},
+			rolling_6_months_data: {
+				...rolling_6_months_data,
+				dates: rolling_6_months_dates,
+			},
+			rolling_12_months_data: {
+				...rolling_12_months_data,
+				dates: rolling_12_months_dates,
+			},
+			last_3_months_data: {
+				...last_3_months_data,
+				dates: last_3_months_dates,
+			},
+			last_6_months_data: {
+				...last_6_months_data,
+				dates: last_6_months_dates,
+			},
+			last_12_months_data: {
+				...last_12_months_data,
+				dates: last_12_months_dates,
+			},
+		});
 	});
-
-	const rolling_6_months_dates = by_month_dates.slice(5).map((date, i) => {
-		const new_date = new Date(date);
-		return new_date;
-	});
-
-	const rolling_12_months_dates = by_month_dates.slice(11).map((date, i) => {
-		const new_date = new Date(date);
-		return new_date;
-	});
-
-	// Create dates for last N months
-	const create_last_n_months_dates = (period: number): Date[] => {
-		const dates: Date[] = [];
-		for (let i = by_month_dates.length; i >= period; i -= period) {
-			const date = new Date(by_month_dates[i - 1]);
-			dates.unshift(date);
-		}
-		return dates;
-	};
-
-	const last_3_months_dates = create_last_n_months_dates(3);
-	const last_6_months_dates = create_last_n_months_dates(6);
-	const last_12_months_dates = create_last_n_months_dates(12);
-
-	return {
-		months_data: {
-			...months_data,
-			dates: by_month_dates,
-		},
-		quarters_data: {
-			...quarters_data,
-			dates: by_quarter_dates,
-		},
-		half_year_data: {
-			...half_year_data,
-			dates: by_half_year_dates,
-		},
-		years_data: {
-			...years_data,
-			dates: by_year_dates,
-		},
-		rolling_3_months_data: {
-			...rolling_3_months_data,
-			dates: rolling_3_months_dates,
-		},
-		rolling_6_months_data: {
-			...rolling_6_months_data,
-			dates: rolling_6_months_dates,
-		},
-		rolling_12_months_data: {
-			...rolling_12_months_data,
-			dates: rolling_12_months_dates,
-		},
-		last_3_months_data: {
-			...last_3_months_data,
-			dates: last_3_months_dates,
-		},
-		last_6_months_data: {
-			...last_6_months_data,
-			dates: last_6_months_dates,
-		},
-		last_12_months_data: {
-			...last_12_months_data,
-			dates: last_12_months_dates,
-		},
-	};
 }

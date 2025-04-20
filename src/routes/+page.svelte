@@ -1,141 +1,113 @@
-<script>
+<script lang="ts">
 	import { onMount } from "svelte";
 	import { filter_data } from "$lib/filter-data";
+	import type ApexCharts from "apexcharts";
 
-	/**
-	 * @type {HTMLDivElement | undefined}
-	 */
-	let main_chart_div = $state();
-
-	/**
-	 * @type {HTMLDivElement | undefined}
-	 */
-	let brush_chart_div = $state();
-
-	const {
-		months_data,
-		quarters_data,
-		half_year_data,
-		years_data,
-		rolling_3_months_data,
-		rolling_6_months_data,
-		rolling_12_months_data,
-		last_3_months_data,
-		last_6_months_data,
-		last_12_months_data,
-	} = filter_data();
+	let main_chart_div: HTMLDivElement | undefined = $state();
+	let brush_chart_div: HTMLDivElement | undefined = $state();
 
 	let selected_range = $state("years");
-	/** @type {Date[]} */
-	let dates = [];
-	/** @type {{data: number[], name: string}[]} */
-	let series = [];
-	/** @type {{data: number[], name: string}} */
-	let all_series = { data: [], name: "" };
-	update_selected_range();
+	let dates: Date[] = $state([]);
+	let series: { data: number[]; name: string }[] = $state([]);
+	let all_series: { data: number[]; name: string } = $state({ data: [], name: "" });
+	let main_chart: ApexCharts;
+	let brush_chart: ApexCharts;
+	let main_chart_options: ApexCharts.ApexOptions | undefined = $state();
+	let brush_chart_options: ApexCharts.ApexOptions | undefined = $state();
 
-	const max_date = dates[dates.length - 1];
-	const six_years_back = new Date();
-	six_years_back.setFullYear(max_date.getFullYear() - 6);
+	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
 
-	/**
-	 * @param {{data: number[], name: string}} series
-	 */
-	function get_series(series) {
+	function get_series(series: { data: number[]; name: string }): ApexAxisChartSeries {
 		return {
 			name: series.name,
 			data: series.data.map((x, i) => [dates[i], x]),
 		};
 	}
 
-	const main_chart_options = {
-		chart: {
-			id: "main_chart",
-			height: "100%",
-			type: "line",
-			animations: {
-				initialAnimation: {
+	onMount(async () => {
+		data = await filter_data();
+		update_selected_range();
+		const max_date = dates[dates.length - 1];
+		const six_years_back = new Date();
+		six_years_back.setFullYear(max_date.getFullYear() - 6);
+
+		main_chart_options = {
+			chart: {
+				id: "main_chart",
+				height: "100%",
+				type: "line",
+				toolbar: {
+					autoSelected: "pan",
+					show: false,
+				},
+			},
+			stroke: {
+				width: 3,
+				curve: "monotoneCubic",
+			},
+			series: [...series.map((s) => get_series(s))],
+			xaxis: {
+				type: "datetime",
+			},
+			yaxis: {
+				labels: {
+					offsetX: -15,
+				},
+			},
+			grid: {
+				padding: {
+					left: -5,
+					right: 5,
+				},
+			},
+		};
+
+		brush_chart_options = {
+			series: [get_series(all_series)],
+			chart: {
+				id: "brush_chart",
+				height: "100%",
+				type: "area",
+				brush: {
+					target: "main_chart",
+					enabled: true,
+				},
+				selection: {
+					enabled: true,
+					xaxis: {
+						min: six_years_back.getTime(),
+						max: max_date.getTime(),
+					},
+				},
+			},
+			colors: ["#008FFB"],
+			fill: {
+				type: "gradient",
+				gradient: {
+					opacityFrom: 0.91,
+					opacityTo: 0.1,
+				},
+			},
+			xaxis: {
+				type: "datetime",
+				tooltip: {
 					enabled: false,
 				},
 			},
-			toolbar: {
-				autoSelected: "pan",
-				show: false,
-			},
-		},
-		stroke: {
-			width: 3,
-			curve: "monotoneCubic",
-		},
-		series: [...series.map((s) => get_series(s))],
-		xaxis: {
-			type: "datetime",
-		},
-		yaxis: {
-			labels: {
-				offsetX: -15,
-			},
-		},
-		grid: {
-			padding: {
-				left: -5,
-				right: 5,
-			},
-		},
-	};
-
-	const brush_chart_options = {
-		series: [get_series(all_series)],
-		chart: {
-			id: "brush_chart",
-			height: "100%",
-			type: "area",
-			brush: {
-				target: "main_chart",
-				enabled: true,
-			},
-			selection: {
-				enabled: true,
-				xaxis: {
-					min: six_years_back.getTime(),
-					max: max_date.getTime(),
+			yaxis: {
+				labels: {
+					offsetX: -15,
 				},
 			},
-		},
-		colors: ["#008FFB"],
-		fill: {
-			type: "gradient",
-			gradient: {
-				opacityFrom: 0.91,
-				opacityTo: 0.1,
+			grid: {
+				padding: {
+					left: -5,
+				},
 			},
-		},
-		xaxis: {
-			type: "datetime",
-			tooltip: {
-				enabled: false,
-			},
-		},
-		yaxis: {
-			labels: {
-				offsetX: -15,
-			},
-		},
-		grid: {
-			padding: {
-				left: -5,
-			},
-		},
-	};
+		};
 
-	/** @type {import("apexcharts")} */
-	let main_chart;
-	/** @type {import("apexcharts")} */
-	let brush_chart;
-
-	onMount(async () => {
 		const ApexCharts = (await import("apexcharts")).default;
-		/** @type {any} */ (window).ApexCharts = ApexCharts;
+		(window as any).ApexCharts = ApexCharts;
 		main_chart = new ApexCharts(main_chart_div, main_chart_options);
 		brush_chart = new ApexCharts(brush_chart_div, brush_chart_options);
 		main_chart.render();
@@ -143,30 +115,38 @@
 	});
 
 	function update_selected_range() {
+		if (data == null) {
+			throw new Error("Data not loaded");
+		}
+
 		if (selected_range === "months") {
-			({ dates, series, all_series } = months_data);
+			({ dates, series, all_series } = data.months_data);
 		} else if (selected_range === "quarters") {
-			({ dates, series, all_series } = quarters_data);
+			({ dates, series, all_series } = data.quarters_data);
 		} else if (selected_range === "half-year") {
-			({ dates, series, all_series } = half_year_data);
+			({ dates, series, all_series } = data.half_year_data);
 		} else if (selected_range === "years") {
-			({ dates, series, all_series } = years_data);
+			({ dates, series, all_series } = data.years_data);
 		} else if (selected_range === "rolling-3-months") {
-			({ dates, series, all_series } = rolling_3_months_data);
+			({ dates, series, all_series } = data.rolling_3_months_data);
 		} else if (selected_range === "rolling-6-months") {
-			({ dates, series, all_series } = rolling_6_months_data);
+			({ dates, series, all_series } = data.rolling_6_months_data);
 		} else if (selected_range === "rolling-12-months") {
-			({ dates, series, all_series } = rolling_12_months_data);
+			({ dates, series, all_series } = data.rolling_12_months_data);
 		} else if (selected_range === "last-3-months") {
-			({ dates, series, all_series } = last_3_months_data);
+			({ dates, series, all_series } = data.last_3_months_data);
 		} else if (selected_range === "last-6-months") {
-			({ dates, series, all_series } = last_6_months_data);
+			({ dates, series, all_series } = data.last_6_months_data);
 		} else if (selected_range === "last-12-months") {
-			({ dates, series, all_series } = last_12_months_data);
+			({ dates, series, all_series } = data.last_12_months_data);
 		}
 	}
 
 	function update_chart() {
+		if (main_chart_options == null || brush_chart_options == null) {
+			throw new Error("Chart options not loaded");
+		}
+
 		main_chart_options.series = [...series.map((s) => get_series(s))];
 		brush_chart_options.series = [get_series(all_series)];
 		main_chart.updateOptions(main_chart_options);
