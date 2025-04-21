@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { filter_data } from "$lib/filter-data";
+	import { filter_data, by_month_data } from "$lib/filter-data";
 	import type ApexCharts from "apexcharts";
+
+	let selected_preset = $state("only_russia");
+	let selected_top_countries_count = $state(10);
 
 	let main_chart_div: HTMLDivElement | undefined = $state();
 	let brush_chart_div: HTMLDivElement | undefined = $state();
@@ -15,7 +18,7 @@
 	let main_chart_options: ApexCharts.ApexOptions | undefined = $state();
 	let brush_chart_options: ApexCharts.ApexOptions | undefined = $state();
 
-	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
+	let data: Awaited<ReturnType<typeof filter_data>>;
 
 	function get_series(series: { data: number[]; name: string }): ApexAxisChartSeries[number] {
 		return {
@@ -25,20 +28,21 @@
 		};
 	}
 
+	async function update_preset() {
+		if (selected_preset === "top_list") {
+			const top_countries = by_month_data.series
+				.slice(0, selected_top_countries_count)
+				.map((s) => s.name);
+			data = await filter_data(top_countries);
+		} else if (selected_preset === "only_russia") {
+			data = await filter_data(["Russland"]);
+		} else {
+			data = await filter_data();
+		}
+	}
+
 	onMount(async () => {
-		data = await filter_data([
-			"Danmark",
-			"Sambandsríki Amerika (USA)",
-			"Kina",
-			"Russland",
-			"Bretland",
-			"Týskland",
-			"Frakland",
-			"Spania",
-			"Niðurlond",
-			"Ísland",
-			"Pólland",
-		]);
+		await update_preset();
 		update_selected_range();
 		const max_date = dates[dates.length - 1];
 		const six_years_back = new Date();
@@ -194,7 +198,57 @@
 			</optgroup>
 		</select>
 
-		<span>
+		<!-- Preset Filter Select -->
+		<label style="white-space: nowrap">
+			<span>Individuel lond</span>
+			<select
+				bind:value={selected_preset}
+				onchange={async () => {
+					await update_preset();
+					update_selected_range();
+					update_chart();
+				}}
+			>
+				<option value="none">Eingin lond</option>
+				<option value="only_russia">Bert Russland</option>
+				<option value="top_list">Topp N lond</option>
+			</select>
+		</label>
+
+		<!-- Top N Count Select (Conditional) -->
+		{#if selected_preset === "top_list"}
+			<select
+				bind:value={selected_top_countries_count}
+				onchange={async () => {
+					await update_preset();
+					update_selected_range();
+					update_chart();
+				}}
+			>
+				<option value={1}>Topp 1</option>
+				<option value={2}>Topp 2</option>
+				<option value={3}>Topp 3</option>
+				<option value={4}>Topp 4</option>
+				<option value={5}>Topp 5</option>
+				<option value={6}>Topp 6</option>
+				<option value={7}>Topp 7</option>
+				<option value={8}>Topp 8</option>
+				<option value={9}>Topp 9</option>
+				<option value={10}>Topp 10</option>
+				<option value={11}>Topp 11</option>
+				<option value={12}>Topp 12</option>
+				<option value={13}>Topp 13</option>
+				<option value={14}>Topp 14</option>
+				<option value={15}>Topp 15</option>
+				<option value={16}>Topp 16</option>
+				<option value={17}>Topp 17</option>
+				<option value={18}>Topp 18</option>
+				<option value={19}>Topp 19</option>
+				<option value={20}>Topp 20</option>
+			</select>
+		{/if}
+
+		<span style="white-space: nowrap">
 			<a href="/by-month-table/months">Tabell við øllum data</a>
 		</span>
 	</div>

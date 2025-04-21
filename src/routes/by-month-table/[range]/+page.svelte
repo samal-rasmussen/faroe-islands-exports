@@ -30,24 +30,22 @@
 							? "half_year_data"
 							: "years_data"
 			];
-		let calculated_rows = [
+		let result_rows = [
 			filtered_data.all_series,
 			...filtered_data.series,
 			...filtered_data.individual_series,
 		];
-		calculated_rows = calculated_rows.filter((x, index) => {
+		result_rows = result_rows.filter((x, index) => {
 			// remove duplicates
-			return calculated_rows.findIndex((y) => y.name === x.name) === index;
+			return result_rows.findIndex((y) => y.name === x.name) === index;
 		});
-		calculated_rows.sort((a, b) => {
-			if (a === undefined || b === undefined) return 0;
-			const a_last = a.data.at(-1);
-			const b_last = b.data.at(-1);
-			if (a_last === undefined || b_last === undefined) return 0;
+		result_rows.sort((a, b) => {
+			const a_last = a.data.at(-1)!;
+			const b_last = b.data.at(-1)!;
 			return b_last - a_last;
 		});
 		header = filtered_data.header;
-		rows = calculated_rows;
+		rows = result_rows;
 	}
 </script>
 

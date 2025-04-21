@@ -25,7 +25,12 @@ function parse_csv(csv_string: string): {
 	return { series, header };
 }
 
-const by_month_data = parse_csv(by_month_csv);
+export const by_month_data = parse_csv(by_month_csv);
+by_month_data.series.sort((a, b) => {
+	const a_last = a.data.at(-1)!;
+	const b_last = b.data.at(-1)!;
+	return b_last - a_last;
+});
 // by_month_data.header format looks like: 1998M04 meaning year 1998 and month April
 const by_monts_split_header = by_month_data.header.map((month) => month.split("M"));
 const by_month_dates = by_monts_split_header.map((v) => {
@@ -233,7 +238,7 @@ function filter_data_internal(
 	};
 }
 
-function get_maps(individual_countries_list: string[]) {
+function get_maps(individual_countries_list: ReadonlyArray<string>) {
 	const individual_countries_map = new Map(
 		individual_countries_list.map((country) => [country, true]),
 	);
@@ -294,7 +299,7 @@ interface DataWithDates extends Data {
 	dates: Date[];
 }
 
-export async function filter_data(individual_countries_list: string[] = []): Promise<{
+export async function filter_data(individual_countries_list: ReadonlyArray<string> = []): Promise<{
 	months_data: DataWithDates;
 	quarters_data: DataWithDates;
 	half_year_data: DataWithDates;
