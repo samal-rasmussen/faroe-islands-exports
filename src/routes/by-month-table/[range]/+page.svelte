@@ -4,17 +4,23 @@
 	import { goto } from "$app/navigation";
 	import { ranges, type Range } from "./shared";
 	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
 
 	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
 	let data_promise = filter_data().then((d) => {
 		data = d;
 		get_header_and_rows();
+		requestAnimationFrame(() => {
+			if (browser && table_container) {
+				table_container.scrollLeft = table_container.scrollWidth;
+			}
+		});
 	});
 
 	let selected_range = $state($page.params.range as Range);
 	let header: string[] = $state([]);
 	let rows: Serie[] = $state([]);
-
+	let table_container: HTMLDivElement | undefined = $state();
 	function get_header_and_rows() {
 		if (data == null) {
 			throw new Error("Data is not loaded");
@@ -52,8 +58,8 @@
 {#await data_promise}
 	<div>Loading...</div>
 {:then}
-	<div style="display: flex; flex-direction: column; gap: 1rem;">
-		<div>
+	<div class="wrapper">
+		<div class="controls-container">
 			<label for="range-select">Select Range:</label>
 			<select
 				id="range-select"
@@ -71,30 +77,45 @@
 			</select>
 		</div>
 
-		<table>
-			<thead>
-				<tr>
-					<th></th>
-					{#each header as column}
-						<th>{column}</th>
-					{/each}
-				</tr>
-			</thead>
-			<tbody>
-				{#each rows as row}
+		<div class="table-container" bind:this={table_container}>
+			<table>
+				<thead>
 					<tr>
-						<td>{row.name}</td>
-						{#each row.data as column}
-							<td class="number">{Math.floor(column).toLocaleString()}</td>
+						<th class="sticky"></th>
+						{#each header as column}
+							<th>{column}</th>
 						{/each}
 					</tr>
-				{/each}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{#each rows as row}
+						<tr>
+							<td class="sticky">{row.name}</td>
+							{#each row.data as column}
+								<td class="number">{Math.floor(column).toLocaleString()}</td>
+							{/each}
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
 	</div>
 {/await}
 
 <style>
+	.wrapper {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		height: 100vh;
+		width: 100vw;
+	}
+	.controls-container {
+		padding: 0.5rem;
+	}
+	.table-container {
+		overflow: auto;
+	}
 	table {
 		border-collapse: collapse;
 	}
@@ -103,6 +124,13 @@
 		border: 1px solid #000;
 		padding: 0.2em;
 		white-space: nowrap;
+		background-color: white;
+	}
+	th.sticky,
+	td.sticky {
+		position: sticky;
+		left: 0;
+		border-right: 2px solid #000;
 	}
 	.number {
 		text-align: right;

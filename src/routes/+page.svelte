@@ -264,10 +264,6 @@
 </div>
 
 <style>
-	:global(body) {
-		margin: 0;
-	}
-
 	.full-height-container {
 		height: 100vh;
 		max-height: 100vh;
