@@ -3,26 +3,26 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "vite dev",
 		"build": "vite build",
-		"fetch": "node fetch.js",
-		"preview": "vite preview",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch"
+		"dev": "vite dev",
+		"fetch": "node fetch.js",
+		"preview": "vite preview"
 	},
 	"dependencies": {
 		"apexcharts": "4.5.0"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "6.0.0",
+		"@sveltejs/adapter-static": "3.0.8",
 		"@sveltejs/kit": "2.20.7",
 		"@sveltejs/vite-plugin-svelte": "5.0.3",
 		"json5": "2.2.3",
-		"svelte-check": "4.1.6",
 		"svelte": "5.28.1",
+		"svelte-check": "4.1.6",
 		"typescript": "5.8.3",
-		"vite-plugin-json5": "1.1.6",
-		"vite": "6.3.2"
+		"vite": "6.3.2",
+		"vite-plugin-json5": "1.1.6"
 	},
 	"type": "module"
 }
