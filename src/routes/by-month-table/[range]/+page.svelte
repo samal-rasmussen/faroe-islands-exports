@@ -131,6 +131,9 @@
 		position: sticky;
 		left: 0;
 		border-right: 2px solid #000;
+		max-width: 148px !important;
+		overflow-x: auto;
+		scrollbar-width: none;
 	}
 	.number {
 		text-align: right;
