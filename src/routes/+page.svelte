@@ -365,4 +365,19 @@
 			margin-left: -0.4rem;
 		}
 	}
+
+	:global(.apexcharts-series.legend-mouseover-inactive) {
+		opacity: 0.7;
+	}
+	:global(
+			.apexcharts-series:not(.legend-mouseover-inactive):has(
+					+ .apexcharts-series.legend-mouseover-inactive
+				)
+		) {
+		filter: drop-shadow(1px 1px 1px rgba(128, 128, 128, 0.175)) /* Outline */
+			drop-shadow(-1px -1px 1px rgba(128, 128, 128, 0.175)) /* Outline */
+			drop-shadow(1px -1px 1px rgba(128, 128, 128, 0.175)) /* Outline */
+			drop-shadow(-1px 1px 1px rgba(128, 128, 128, 0.175)) /* Outline */ contrast(120%);
+		z-index: 999;
+	}
 </style>
