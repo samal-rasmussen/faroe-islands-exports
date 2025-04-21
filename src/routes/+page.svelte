@@ -64,10 +64,6 @@
 				id: "main_chart",
 				height: "100%",
 				type: "line",
-				toolbar: {
-					autoSelected: "pan",
-					show: false,
-				},
 				zoom: {
 					enabled: false,
 				},
@@ -110,16 +106,8 @@
 			series: [...series.map((s) => get_series(s))],
 			xaxis: {
 				type: "datetime",
-			},
-			yaxis: {
-				labels: {
-					offsetX: -15,
-				},
-			},
-			grid: {
-				padding: {
-					left: -5,
-					right: 5,
+				tooltip: {
+					enabled: false,
 				},
 			},
 		};
@@ -161,16 +149,6 @@
 				type: "datetime",
 				tooltip: {
 					enabled: false,
-				},
-			},
-			yaxis: {
-				labels: {
-					offsetX: -15,
-				},
-			},
-			grid: {
-				padding: {
-					left: -5,
 				},
 			},
 		};
@@ -359,12 +337,12 @@
 		flex-direction: column;
 		flex-grow: 1;
 		overflow-y: auto;
-		padding: 0 1.5rem 2rem 1.5rem;
+		padding: 0 0.8rem 2rem 0.1rem;
 	}
 
 	.main-chart-wrapper {
 		flex-grow: 1;
-		min-height: 200px;
+		min-height: 350px;
 		max-height: 1000px;
 		width: 100%;
 	}
@@ -372,5 +350,19 @@
 	.brush-chart-wrapper {
 		height: 120px;
 		width: 100%;
+	}
+
+	@media (max-width: 768px) {
+		.controls {
+			padding: 0.6rem;
+			row-gap: 0.4rem;
+		}
+		.preset-filter-wrapper {
+			row-gap: 0.4rem;
+		}
+		.content {
+			padding: 0 0.4rem 1rem 0;
+			margin-left: -0.4rem;
+		}
 	}
 </style>
