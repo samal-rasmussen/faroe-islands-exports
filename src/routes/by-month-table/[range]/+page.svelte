@@ -136,4 +136,7 @@
 		text-align: right;
 		font-variant-numeric: tabular-nums;
 	}
+	tbody tr:nth-child(even) td {
+		background-color: #e1e1e1;
+	}
 </style>
