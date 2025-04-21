@@ -9,7 +9,17 @@
 	let main_chart_div: HTMLDivElement | undefined = $state();
 	let brush_chart_div: HTMLDivElement | undefined = $state();
 
-	let selected_range = $state("years");
+	let selected_range:
+		| "months"
+		| "quarters"
+		| "half-year"
+		| "years"
+		| "rolling-3-months"
+		| "rolling-6-months"
+		| "rolling-12-months"
+		| "last-3-months"
+		| "last-6-months"
+		| "last-12-months" = $state("last-3-months");
 	let dates: Date[] = $state([]);
 	let series: { data: number[]; name: string }[] = $state([]);
 	let all_series: { data: number[]; name: string } = $state({ data: [], name: "" });
@@ -45,8 +55,8 @@
 		await update_preset();
 		update_selected_range();
 		const max_date = dates[dates.length - 1];
-		const six_years_back = new Date();
-		six_years_back.setFullYear(max_date.getFullYear() - 6);
+		const start_min_date = new Date();
+		start_min_date.setFullYear(max_date.getFullYear() - 6);
 
 		main_chart_options = {
 			chart: {
@@ -92,7 +102,7 @@
 				selection: {
 					enabled: true,
 					xaxis: {
-						min: six_years_back.getTime(),
+						min: start_min_date.getTime(),
 						max: max_date.getTime(),
 					},
 				},
@@ -191,10 +201,10 @@
 				<option value="last-6-months">Seinastu 6 mánaðir</option>
 				<option value="last-12-months">Seinastu 12 mánaðir</option>
 			</optgroup>
-			<optgroup label="Mánaði við rullandi tíðarskeið">
-				<option value="rolling-3-months">Rullandi 3 mánaðir</option>
-				<option value="rolling-6-months">Rullandi 6 mánaðir</option>
-				<option value="rolling-12-months">Rullandi 12 mánaðir</option>
+			<optgroup label="Mánaði við rullandi miðal">
+				<option value="rolling-3-months">3 mánaðir</option>
+				<option value="rolling-6-months">6 mánaðir</option>
+				<option value="rolling-12-months">12 mánaðir</option>
 			</optgroup>
 		</select>
 
