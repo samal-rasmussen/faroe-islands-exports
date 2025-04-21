@@ -295,7 +295,7 @@ interface Data {
 	all_series: Serie;
 }
 
-interface DataWithDates extends Data {
+export interface DataWithDates extends Data {
 	dates: Date[];
 }
 

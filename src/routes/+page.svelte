@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { filter_data, by_month_data } from "$lib/filter-data";
+	import { filter_data, by_month_data, type DataWithDates } from "$lib/filter-data";
 	import type ApexCharts from "apexcharts";
 
 	let selected_preset = $state("only_russia");
@@ -27,6 +27,7 @@
 	let brush_chart: ApexCharts;
 	let main_chart_options: ApexCharts.ApexOptions | undefined = $state();
 	let brush_chart_options: ApexCharts.ApexOptions | undefined = $state();
+	let lastBrushSelection: [number, number] | null = null;
 
 	let data: Awaited<ReturnType<typeof filter_data>>;
 
@@ -66,6 +67,9 @@
 				toolbar: {
 					autoSelected: "pan",
 					show: false,
+				},
+				zoom: {
+					enabled: false,
 				},
 			},
 			colors: [
@@ -137,6 +141,13 @@
 						max: max_date.getTime(),
 					},
 				},
+				events: {
+					brushScrolled: function (...args) {
+						const val: { xaxis: { min: number; max: number } } = args[1];
+						console.log("brush selection", val.xaxis.min, val.xaxis.max);
+						lastBrushSelection = [val.xaxis.min, val.xaxis.max];
+					},
+				},
 			},
 			colors: ["#008FFB"],
 			fill: {
@@ -177,38 +188,53 @@
 			throw new Error("Data not loaded");
 		}
 
+		let new_selected: DataWithDates;
 		if (selected_range === "months") {
-			({ dates, series, all_series } = data.months_data);
+			new_selected = data.months_data;
 		} else if (selected_range === "quarters") {
-			({ dates, series, all_series } = data.quarters_data);
+			new_selected = data.quarters_data;
 		} else if (selected_range === "half-year") {
-			({ dates, series, all_series } = data.half_year_data);
+			new_selected = data.half_year_data;
 		} else if (selected_range === "years") {
-			({ dates, series, all_series } = data.years_data);
+			new_selected = data.years_data;
 		} else if (selected_range === "rolling-3-months") {
-			({ dates, series, all_series } = data.rolling_3_months_data);
+			new_selected = data.rolling_3_months_data;
 		} else if (selected_range === "rolling-6-months") {
-			({ dates, series, all_series } = data.rolling_6_months_data);
+			new_selected = data.rolling_6_months_data;
 		} else if (selected_range === "rolling-12-months") {
-			({ dates, series, all_series } = data.rolling_12_months_data);
+			new_selected = data.rolling_12_months_data;
 		} else if (selected_range === "last-3-months") {
-			({ dates, series, all_series } = data.last_3_months_data);
+			new_selected = data.last_3_months_data;
 		} else if (selected_range === "last-6-months") {
-			({ dates, series, all_series } = data.last_6_months_data);
+			new_selected = data.last_6_months_data;
 		} else if (selected_range === "last-12-months") {
-			({ dates, series, all_series } = data.last_12_months_data);
+			new_selected = data.last_12_months_data;
+		} else {
+			throw new Error("Invalid range");
 		}
+
+		({ dates, series, all_series } = new_selected);
 	}
 
 	function update_chart() {
 		if (main_chart_options == null || brush_chart_options == null) {
 			throw new Error("Chart options not loaded");
 		}
-
-		main_chart_options.series = [...series.map((s) => get_series(s))];
-		brush_chart_options.series = [get_series(all_series)];
-		main_chart.updateOptions(main_chart_options);
-		brush_chart.updateOptions(brush_chart_options);
+		main_chart.updateSeries([...series.map((s) => get_series(s))]);
+		const new_brush_options: ApexCharts.ApexOptions = {
+			series: [get_series(all_series)],
+		};
+		if (lastBrushSelection) {
+			new_brush_options.chart = {
+				selection: {
+					xaxis: {
+						min: lastBrushSelection[0],
+						max: lastBrushSelection[1],
+					},
+				},
+			};
+		}
+		brush_chart.updateOptions(new_brush_options);
 	}
 </script>
 
