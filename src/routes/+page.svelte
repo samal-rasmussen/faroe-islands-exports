@@ -3,7 +3,7 @@
 	import { filter_data, by_month_data, type DataWithDates } from "$lib/filter-data";
 	import type ApexCharts from "apexcharts";
 
-	let selected_preset = $state("only_russia");
+	let selected_preset: "sum" | "only_russia" | "top_list" | "none" = $state("only_russia");
 	let selected_top_countries_count = $state(10);
 
 	let main_chart_div: HTMLDivElement | undefined = $state();
@@ -47,8 +47,13 @@
 			data = await filter_data(top_countries);
 		} else if (selected_preset === "only_russia") {
 			data = await filter_data(["Russland"]);
-		} else {
+		} else if (selected_preset === "none") {
 			data = await filter_data();
+		} else if (selected_preset === "sum") {
+			data = await filter_data();
+		} else {
+			const check: never = selected_preset;
+			throw new Error("Invalid preset: " + check);
 		}
 	}
 
@@ -198,7 +203,11 @@
 		if (main_chart_options == null || brush_chart_options == null) {
 			throw new Error("Chart options not loaded");
 		}
-		main_chart.updateSeries([...series.map((s) => get_series(s))]);
+		if (selected_preset === "sum") {
+			main_chart.updateSeries([get_series(all_series)]);
+		} else {
+			main_chart.updateSeries([...series.map((s) => get_series(s))]);
+		}
 		const new_brush_options: ApexCharts.ApexOptions = {
 			series: [get_series(all_series)],
 		};
@@ -255,6 +264,7 @@
 						update_chart();
 					}}
 				>
+					<option value="sum">Tilsamans</option>
 					<option value="none">Eingin lond</option>
 					<option value="only_russia">Bert Russland</option>
 					<option value="top_list">Topp N lond</option>
