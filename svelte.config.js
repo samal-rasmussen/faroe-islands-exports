@@ -6,6 +6,9 @@ const config = {
 		adapter: adapter({
 			pages: "docs",
 		}),
+		paths: {
+			base: process.env.NODE_ENV === "production" ? "/faroe-islands-exports" : "",
+		},
 	},
 };
 

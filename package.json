@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "vite build",
+		"postbuild": "cp -r static_docs/. docs/",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"dev": "vite dev",
