@@ -4,6 +4,7 @@
 	import { goto } from "$app/navigation";
 	import { ranges, type Range } from "./shared";
 	import { browser } from "$app/environment";
+	import { base } from "$app/paths";
 
 	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
 	let data_promise = filter_data().then((d) => {
@@ -64,7 +65,7 @@
 				id="range-select"
 				bind:value={selected_range}
 				onchange={() => {
-					goto(`/by-month-table/${selected_range}`);
+					goto(`${base}/by-month-table/${selected_range}`);
 					get_header_and_rows();
 				}}
 			>
