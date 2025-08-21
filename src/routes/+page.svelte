@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { filter_data, by_month_data, type DataWithDates } from "$lib/filter-data";
 	import type ApexCharts from "apexcharts";
+	import { base } from "$app/paths";
 
 	let selected_preset: "sum" | "only_russia" | "top_list" | "none" = $state("only_russia");
 	let selected_top_countries_count = $state(10);
@@ -306,7 +307,7 @@
 		</div>
 
 		<span style="white-space: nowrap">
-			<a href="/by-month-table/months">Tabell við øllum data</a>
+			<a href="{base}/by-month-table/months">Tabell við øllum data</a>
 		</span>
 	</div>
 
