@@ -4,12 +4,7 @@
 		<meta charset="utf-8" />
 		<title>Faroe Islands Exports</title>
 		<script type="text/javascript">
-			// Single Page Apps for GitHub Pages
-			// MIT License
-			// https://github.com/rafgraph/spa-github-pages
-			// This script takes the current url and converts the path and query
-			// string into just a query string, and then redirects the browser
-			// to the new url with only a query string and hash fragment.
+			// Handle 404s for SPA on GitHub Pages
 
 			var l = window.location;
 			const base =
@@ -17,10 +12,7 @@
 				"//" +
 				l.hostname +
 				(l.port ? ":" + l.port : "") +
-				l.pathname
-					.split("/")
-					.slice(0, 1 + pathSegmentsToKeep)
-					.join("/") +
+				l.pathname.split("/").slice(0, 1).join("/") +
 				"/";
 			const search = l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "";
 			const hash = l.hash;
