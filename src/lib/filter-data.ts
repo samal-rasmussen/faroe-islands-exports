@@ -41,9 +41,27 @@ const by_month_dates = by_monts_split_header.map((v) => {
 });
 const first_month = by_month_dates[0].getMonth();
 const first_year = by_month_dates[0].getFullYear();
-const by_quarter_dates = by_month_dates.filter((date) => date.getMonth() % 3 === 0);
-const by_half_year_dates = by_month_dates.filter((date) => date.getMonth() % 6 === 0);
-const by_year_dates = by_month_dates.filter((date) => date.getMonth() === 0);
+
+function get_aligned_start(period: number): number {
+	const offset = first_month % period;
+	return offset === 0 ? 0 : period - offset;
+}
+function get_period_end_dates(period: number): Date[] {
+	const dates: Date[] = [];
+	const start = get_aligned_start(period);
+	dates.push(new Date(by_month_dates[0]));
+	for (let i = start; i < by_month_dates.length; i += period) {
+		const remaining = by_month_dates.length - i;
+		const slice_end = i + Math.min(period, remaining);
+		const end_date = new Date(by_month_dates[slice_end - 1]);
+		dates.push(end_date);
+	}
+	return dates;
+}
+
+const by_quarter_dates = get_period_end_dates(3);
+const by_half_year_dates = get_period_end_dates(6);
+const by_year_dates = get_period_end_dates(12);
 
 function aggregate_period_data(
 	series: { data: number[]; name: string },
@@ -60,24 +78,42 @@ function aggregate_period_data(
 	const data: number[] = [];
 	const header: string[] = [];
 	const offset = first_month % period;
-	// Skip partial period at start if needed
+	// Determine alignment and include an initial partial period if present
 	const start = offset === 0 ? 0 : period - offset;
+
+	// Include initial partial period (from index 0 to start - 1)
+	if (start > 0) {
+		const partial_sum = series.data.slice(0, start).reduce((a, b) => a + b, 0);
+		const partial_rounded = Math.round(partial_sum * 100) / 100;
+		data.push(partial_rounded);
+		const absoluteMonthIndex = first_month + 0;
+		const year = first_year + Math.floor(absoluteMonthIndex / 12);
+		if (period === 3) {
+			const quarter = Math.floor((absoluteMonthIndex % 12) / 3) + 1;
+			header.push(`${year} Q${quarter}`);
+		} else if (period === 6) {
+			const half = Math.floor((absoluteMonthIndex % 12) / 6) + 1;
+			header.push(`${year} H${half}`);
+		} else if (period === 12) {
+			header.push(`${year}`);
+		}
+	}
+
 	for (let i = start; i < series.data.length; i += period) {
 		const remaining = series.data.length - i;
 		const slice_end = i + Math.min(period, remaining);
 		const sum = series.data.slice(i, slice_end).reduce((a, b) => a + b, 0);
 		const rounded = Math.round(sum * 100) / 100;
 		data.push(rounded);
+		const absoluteMonthIndex = first_month + i;
+		const year = first_year + Math.floor(absoluteMonthIndex / 12);
 		if (period === 3) {
-			const year = first_year + Math.floor(i / 12);
-			const quarter = Math.floor((i % 12) / 3) + 1;
+			const quarter = Math.floor((absoluteMonthIndex % 12) / 3) + 1;
 			header.push(`${year} Q${quarter}`);
 		} else if (period === 6) {
-			const year = first_year + Math.floor(i / 12);
-			const half = Math.floor((i % 12) / 6) + 1;
+			const half = Math.floor((absoluteMonthIndex % 12) / 6) + 1;
 			header.push(`${year} H${half}`);
 		} else if (period === 12) {
-			const year = first_year + Math.floor(i / 12);
 			header.push(`${year}`);
 		}
 	}
@@ -319,29 +355,32 @@ export async function filter_data(individual_countries_list: ReadonlyArray<strin
 			by_month_data.header,
 			maps,
 		);
+		const quarter_all_series = aggregate_period_data(months_data.all_series, 3);
 		const quarters_data: Data = {
-			header: aggregate_period_data(months_data.all_series, 3).header,
+			header: quarter_all_series.header,
 			series: months_data.series.map((series) => aggregate_period_data(series, 3)),
 			individual_series: months_data.individual_series.map((series) =>
 				aggregate_period_data(series, 3),
 			),
-			all_series: aggregate_period_data(months_data.all_series, 3),
+			all_series: quarter_all_series,
 		};
+		const half_year_all_series = aggregate_period_data(months_data.all_series, 6);
 		const half_year_data: Data = {
-			header: aggregate_period_data(months_data.all_series, 6).header,
+			header: half_year_all_series.header,
 			series: months_data.series.map((series) => aggregate_period_data(series, 6)),
 			individual_series: months_data.individual_series.map((series) =>
 				aggregate_period_data(series, 6),
 			),
-			all_series: aggregate_period_data(months_data.all_series, 6),
+			all_series: half_year_all_series,
 		};
+		const year_all_series = aggregate_period_data(months_data.all_series, 12);
 		const years_data: Data = {
-			header: aggregate_period_data(months_data.all_series, 12).header,
+			header: year_all_series.header,
 			series: months_data.series.map((series) => aggregate_period_data(series, 12)),
 			individual_series: months_data.individual_series.map((series) =>
 				aggregate_period_data(series, 12),
 			),
-			all_series: aggregate_period_data(months_data.all_series, 12),
+			all_series: year_all_series,
 		};
 
 		// Create sliding window data for rolling averages

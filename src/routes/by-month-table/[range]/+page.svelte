@@ -3,7 +3,6 @@
 	import { filter_data, type Serie } from "$lib/filter-data";
 	import { goto } from "$app/navigation";
 	import { ranges, type Range } from "./shared";
-	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
 
 	let data: Awaited<ReturnType<typeof filter_data>> | undefined = $state();
