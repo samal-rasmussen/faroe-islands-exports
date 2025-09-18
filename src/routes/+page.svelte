@@ -6,6 +6,8 @@
 
 	let selected_preset: "sum" | "only_russia" | "top_list" | "none" = $state("only_russia");
 	let selected_top_countries_count = $state(10);
+	let include_total = $state(false);
+	let exclude_russia_from_total = $state(false);
 
 	let main_chart_div: HTMLDivElement | undefined = $state();
 	let brush_chart_div: HTMLDivElement | undefined = $state();
@@ -37,6 +39,29 @@
 			name: series.name,
 			// @ts-ignore
 			data: series.data.map((x, i) => [dates[i], x]),
+		};
+	}
+
+	function create_total_minus_russia_series(): { data: number[]; name: string } {
+		// Find Russia series from the current data
+		const russia_series =
+			series.find((s) => s.name === "Russland") ||
+			data?.months_data.individual_series.find((s) => s.name === "Russland");
+
+		if (!russia_series) {
+			// If no Russia data found, return the original total
+			return { ...all_series, name: "Tilsamans (uttan Russland)" };
+		}
+
+		// Subtract Russia data from total
+		const total_minus_russia_data = all_series.data.map((total_value, i) => {
+			const russia_value = russia_series.data[i] || 0;
+			return Math.round((total_value - russia_value) * 100) / 100;
+		});
+
+		return {
+			data: total_minus_russia_data,
+			name: "Tilsamans (uttan Russland)",
 		};
 	}
 
@@ -224,11 +249,28 @@
 		if (main_chart_options == null || brush_chart_options == null) {
 			throw new Error("Chart options not loaded");
 		}
+
+		// Build series list based on preset and include_total checkbox
+		let chart_series;
 		if (selected_preset === "sum") {
-			main_chart.updateSeries([get_series(all_series)]);
+			chart_series = [get_series(all_series)];
 		} else {
-			main_chart.updateSeries([...series.map((s) => get_series(s))]);
+			const base_series = [...series.map((s) => get_series(s))];
+			if (include_total) {
+				if (exclude_russia_from_total) {
+					// Use total minus Russia
+					const total_minus_russia = create_total_minus_russia_series();
+					base_series.push(get_series(total_minus_russia));
+				} else {
+					// Use regular total
+					base_series.push(get_series(all_series));
+				}
+			}
+			chart_series = base_series;
 		}
+
+		main_chart.updateSeries(chart_series);
+
 		const new_brush_options: ApexCharts.ApexOptions = {
 			series: [get_series(all_series)],
 		};
@@ -325,6 +367,26 @@
 				</select>
 			{/if}
 		</div>
+
+		<label style="white-space: nowrap">
+			<input
+				type="checkbox"
+				bind:checked={include_total}
+				disabled={selected_preset === "sum"}
+				onchange={() => update_chart()}
+			/>
+			Vís Tilsamans
+		</label>
+
+		<label style="white-space: nowrap; {include_total ? '' : 'display: none;'}">
+			<input
+				type="checkbox"
+				bind:checked={exclude_russia_from_total}
+				disabled={selected_preset === "sum" || !include_total}
+				onchange={() => update_chart()}
+			/>
+			Tak Russland úr tilsamans
+		</label>
 
 		<span style="white-space: nowrap">
 			<a href="{base}/by-month-table/months">Tabell við øllum data</a>
