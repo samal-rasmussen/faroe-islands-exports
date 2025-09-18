@@ -116,6 +116,16 @@
 					enabled: false,
 				},
 			},
+			yaxis: {
+				labels: {
+					formatter: function (value: number) {
+						return Math.round(value).toLocaleString("de-DE", {
+							minimumFractionDigits: 0,
+							maximumFractionDigits: 0,
+						});
+					},
+				},
+			},
 		};
 
 		brush_chart_options = {
@@ -155,6 +165,16 @@
 				type: "datetime",
 				tooltip: {
 					enabled: false,
+				},
+			},
+			yaxis: {
+				labels: {
+					formatter: function (value: number) {
+						return Math.round(value).toLocaleString("de-DE", {
+							minimumFractionDigits: 0,
+							maximumFractionDigits: 0,
+						});
+					},
 				},
 			},
 		};
