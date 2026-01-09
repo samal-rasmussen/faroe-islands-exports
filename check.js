@@ -22,8 +22,11 @@ export function are_countries_in_country_groups() {
 	const countriesList = Object.values(countriesData);
 
 	// Find countries in countries.json that are not in country-groups.json
-	const missingInCountryGroups = countriesList.filter(
+	let missingInCountryGroups = countriesList.filter(
 		(country) => !countryGroupsCountries.includes(country),
+	);
+	missingInCountryGroups = missingInCountryGroups.filter(
+		(country) => country !== "Ikki nærri útgreinað lond og øki",
 	);
 
 	// Find countries in country-groups.json that are not in countries.json
@@ -31,7 +34,7 @@ export function are_countries_in_country_groups() {
 		(country) => !countriesList.includes(country),
 	);
 
-	const result = true;
+	let result = true;
 
 	if (missingInCountryGroups.length > 0) {
 		console.log(

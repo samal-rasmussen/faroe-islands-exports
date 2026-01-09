@@ -61,6 +61,10 @@ const fetch_csv = async (url) => {
 	const filename = path.join(process.cwd(), "src/lib/by-month.csv");
 
 	const response = await fetch(url);
+	if (!response.ok) {
+		console.error(`Failed to fetch CSV from ${url}: ${response.status} ${response.statusText}`);
+		process.exit(1);
+	}
 	const data = await response.text();
 	const parsed = parse_csv(data);
 
@@ -99,7 +103,7 @@ Mánaður: Vel alt
 To new url for fetching CSV:
 Select "Goym fyrispurning" on the left and select "Semikolonmarkað uttan yvirskrift"
 */
-const by_month = "https://statbank.hagstova.fo:443/sq/707ee16b-5913-4dbe-a843-43b75380e739";
+const by_month = "https://statbank.hagstova.fo:443/sq/36a691d8-4f32-4e0f-aa1e-a382067fca34";
 
 fetch_csv(by_month);
 const valid = are_countries_in_country_groups();
