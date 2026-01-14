@@ -4,7 +4,8 @@
 	import type ApexCharts from "apexcharts";
 	import { base } from "$app/paths";
 
-	let selected_preset: "sum" | "only_russia" | "top_list" | "none" = $state("only_russia");
+	let selected_preset: "sum" | "only_russia" | "top_list" | "none" | "russia_europe_and_rest" =
+		$state("only_russia");
 	let selected_top_countries_count = $state(10);
 	let include_total = $state(false);
 	let exclude_russia_from_total = $state(false);
@@ -65,6 +66,27 @@
 		};
 	}
 
+	function get_series_by_name(name: string): { data: number[]; name: string } | undefined {
+		return series.find((s) => s.name === name);
+	}
+
+	function sum_series(
+		parts: ReadonlyArray<{ data: number[]; name: string }>,
+		name: string,
+	): { data: number[]; name: string } {
+		const length = all_series.data.length;
+		const data = new Array(length).fill(0);
+		for (const part of parts) {
+			for (let i = 0; i < length; i++) {
+				data[i] += part.data[i] ?? 0;
+			}
+		}
+		data.forEach((value, i) => {
+			data[i] = Math.round(value * 100) / 100;
+		});
+		return { name, data };
+	}
+
 	async function update_preset() {
 		if (selected_preset === "top_list") {
 			const top_countries = by_month_data.series
@@ -72,6 +94,11 @@
 				.map((s) => s.name);
 			data = await filter_data(top_countries);
 		} else if (selected_preset === "only_russia") {
+			data = await filter_data(["Russland"]);
+		} else if (selected_preset === "russia_europe_and_rest") {
+			// Force these off to guarantee we always render exactly 3 lines for this preset
+			include_total = false;
+			exclude_russia_from_total = false;
 			data = await filter_data(["Russland"]);
 		} else if (selected_preset === "none") {
 			data = await filter_data();
@@ -254,6 +281,21 @@
 		let chart_series;
 		if (selected_preset === "sum") {
 			chart_series = [get_series(all_series)];
+		} else if (selected_preset === "russia_europe_and_rest") {
+			const russia = get_series_by_name("Russland");
+			const europe = get_series_by_name("Evropa");
+			const nordics = get_series_by_name("Norðurlond");
+			const asia = get_series_by_name("Asia");
+			const africa = get_series_by_name("Afrika");
+			const americas = get_series_by_name("Amerika");
+
+			if (!russia || !europe || !nordics || !asia || !africa || !americas) {
+				throw new Error("Missing expected region series for preset russia_europe_and_rest");
+			}
+
+			const europe_plus_nordics = sum_series([europe, nordics], "Evropa + Norðurlond");
+			const rest = sum_series([asia, africa, americas], "Asia + Afrika + Amerika");
+			chart_series = [get_series(russia), get_series(europe_plus_nordics), get_series(rest)];
 		} else {
 			const base_series = [...series.map((s) => get_series(s))];
 			if (include_total) {
@@ -268,6 +310,23 @@
 			}
 			chart_series = base_series;
 		}
+
+		const last_values = (chart_series as any[]).map((s) => {
+			const last_point = s?.data?.at(-1);
+			const value = Array.isArray(last_point) ? last_point[1] : undefined;
+			return { name: s?.name, value };
+		});
+		const last_values_total = last_values.reduce((acc, { value }) => acc + value, 0);
+		last_values.push({ name: "Tilsamans", value: last_values_total });
+		const formatted_last_values = last_values.map(({ name, value }) => {
+			const percentage = (value / last_values_total) * 100;
+			const formatted_value = Math.round(value).toLocaleString("de-DE", {
+				minimumFractionDigits: 0,
+				maximumFractionDigits: 0,
+			});
+			return `${name}: ${formatted_value} kr (${percentage.toFixed(2)}%)`;
+		});
+		console.log("last values:\n" + formatted_last_values.join("\n"));
 
 		main_chart.updateSeries(chart_series);
 
@@ -330,6 +389,7 @@
 					<option value="sum">Tilsamans</option>
 					<option value="none">Eingin lond</option>
 					<option value="only_russia">Bert Russland</option>
+					<option value="russia_europe_and_rest">Russland / Evropa / Restin</option>
 					<option value="top_list">Topp N lond</option>
 				</select>
 			</label>
@@ -372,7 +432,7 @@
 			<input
 				type="checkbox"
 				bind:checked={include_total}
-				disabled={selected_preset === "sum"}
+				disabled={selected_preset === "sum" || selected_preset === "russia_europe_and_rest"}
 				onchange={() => update_chart()}
 			/>
 			Vís Tilsamans
@@ -382,7 +442,9 @@
 			<input
 				type="checkbox"
 				bind:checked={exclude_russia_from_total}
-				disabled={selected_preset === "sum" || !include_total}
+				disabled={selected_preset === "sum" ||
+					selected_preset === "russia_europe_and_rest" ||
+					!include_total}
 				onchange={() => update_chart()}
 			/>
 			Tak Russland úr tilsamans
